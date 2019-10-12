@@ -1,0 +1,20 @@
+USA,USD
+Japan,JPY
+China,CNY
+Hong Kong,HKD
+South Korea,KRW
+India,INR
+New Zealand,NZD
+Taiwan,NT$
+Australia,AUD
+Pakistan,PKR
+Malaysia,MYR
+Indonesia,IDR
+Singapore,SGD
+Thailand,THB
+Vietnam,VND
+Bangladesh,BDT
+Mongolia,MNT
+Laos,LKP
+Philippines,PHP
+Sri Lanka,LKR
