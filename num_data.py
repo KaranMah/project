@@ -9,10 +9,11 @@ config = {
 }
 
 def read_file(filename):
-    dataset = pd.read_csv(filename, sep=';', delimiter='!', header=0)
+    dataset = pd.read_csv(filename, sep=';')
+    dataset["Index"] = dataset["Index"].apply(lambda x: x.split(','))
     return dataset
 
 
-if __name__ == '__main__':
-    data = read_file(config["filepath"])
-    data
+# if __name__ == '__main__':
+data = read_file(config["filepath"])
+data
