@@ -49,5 +49,5 @@ def get_index_rates(data):
 # if __name__ == '__main__':
 data = read_file(config["raw_data"])
 # get_currency_pairs(list(data["Currency"]))
-# get_forex_rates(config["cur_pairs"])
+get_forex_rates(config["cur_pairs"])
 get_index_rates(data[['Country', 'Index']])
