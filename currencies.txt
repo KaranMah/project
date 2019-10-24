@@ -15,6 +15,6 @@ Philippines;PHP;PSEi Composite
 Singapore;SGD;STI Index
 South Korea;KRW;KOSPI,KOSPI 50
 Sri Lanka;LKR;CSE All-Share
-Taiwan;NT$;Taiwan Weighted,TPEx 50
+Taiwan;TWD;Taiwan Weighted,TPEx 50
 Thailand;THB;SET
 Vietnam;VND;HNX 30,VN 30
