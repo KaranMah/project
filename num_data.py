@@ -14,6 +14,10 @@ def read_file(filename):
     return dataset
 
 
+def get currency_pairs(currencies):
+    ## TODO:
+    data = investpy.get_currency_cross_recent_data(currency_cross='EUR/USD')
+
 # if __name__ == '__main__':
 data = read_file(config["filepath"])
-data
+cur_list = list(data["Currency"])
