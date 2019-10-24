@@ -9,7 +9,7 @@ config = {
 }
 
 def read_file(filename):
-    dataset = pd.read_csv(filename, sep=';', delimiter='!', header=None)
+    dataset = pd.read_csv(filename, sep=';', delimiter='!', header=0)
     return dataset
 
 
