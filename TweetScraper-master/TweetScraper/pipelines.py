@@ -177,15 +177,16 @@ class SaveToFilePipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, Tweet):
-            savePath = os.path.join(self.saveTweetPath, item['ID'])
-            if os.path.isfile(savePath):
-                pass # simply skip existing items
-                ### or you can rewrite the file, if you don't want to skip:
-                # self.save_to_file(item,savePath)
-                # logger.info("Update tweet:%s"%dbItem['url'])
-            else:
-                self.save_to_file(item,savePath)
-                logger.debug("Add tweet:%s" %item['url'])
+            savePath = os.path.join(self.saveTweetPath, '_'.join(item['query'].replace(':',' ').split(' ')))
+            print(item['datetime'])
+            # if os.path.isfile(savePath):
+            #     pass # simply skip existing items
+            #     ### or you can rewrite the file, if you don't want to skip:
+            #     # self.save_to_file(item,savePath)
+            #     # logger.info("Update tweet:%s"%dbItem['url'])
+            # else:
+            self.save_to_file(item,savePath)
+            logger.debug("Add tweet:%s" %item['url'])
 
         elif isinstance(item, User):
             savePath = os.path.join(self.saveUserPath, item['ID'])
@@ -203,9 +204,9 @@ class SaveToFilePipeline(object):
 
 
     def save_to_file(self, item, fname):
-        ''' input: 
+        ''' input:
                 item - a dict like object
                 fname - where to save
         '''
-        with open(fname,'w', encoding='utf-8') as f:
+        with open(fname,'a+', encoding='utf-8') as f:
             json.dump(dict(item), f, ensure_ascii=False)
