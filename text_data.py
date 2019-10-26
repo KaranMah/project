@@ -36,6 +36,14 @@ def gen_twitter_queries(data):
         for item in queries:
             f.write("%s\n" % item)
 
+def gen_reddit_queries(data):
+    queries = []
+    for index, row in data.iterrows():
+        queries.append("".join(row['Country'].split(' ')).lower())
+        queries.append("".join(row['City'].split(' ')).lower())
+    with open('reddit_query.txt', 'w') as f:
+        for item in queries:
+            f.write("%s\n" % item)
 
 data = read_file(config['leaders_data'])
-gen_twitter_queries(data)
+gen_reddit_queries(data)
