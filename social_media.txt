@@ -1,5 +1,5 @@
 Country;City;HOSS
-United States;New York;BarackObama(01/20/2009-01/20/2017),realDonaldTrump(01/20/2017-01/20/2021)
+United States;New York;BarackObama(20/01/2009-20/01/2017),realDonaldTrump(20/01/2017-20/01/2021)
 Australia;Sydney;MrKRudd(03/12/2007-24/06/2010),JuliaGillard(24/06/2010-27/06/2013),MrKRudd(27/06/2013-18/09/2013),HonTonyAbbott(18/09/2013-15/09/2015),TurnbullMalcolm(15/09/2015-24/08/2018),ScottMorrisonMP(24/08/2018-Incumbent)
 Bangladesh;Dhaka;sheikhhasina(06/01/2009-Incumbent)
 China;Shanghai;hujintao(15/03/2008-14/03/2013),XiJingpingReal(14/03/2013-Incumbent)
