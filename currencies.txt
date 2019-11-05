@@ -1,0 +1,20 @@
+Country;Currency;Index
+United States;USD;Dow 30,Nasdaq 100,Nasdaq,S&P 500
+Australia;AUD;S&P/ASX 200
+Bangladesh;BDT;DSE 30
+China;CNY;Shanghai,SZSE Component
+Hong Kong;HKD;Hang Seng
+India;INR;BSE Sensex,Nifty 50
+Indonesia;IDR;IDX Composite
+Japan;JPY;Nikkei 225
+Malaysia;MYR;KLCI
+Mongolia;MNT;MNE Top 20
+New Zealand;NZD;NZX 50,NZX MidCap
+Pakistan;PKR;Karachi 100
+Philippines;PHP;PSEi Composite
+Singapore;SGD;STI Index
+South Korea;KRW;KOSPI,KOSPI 50
+Sri Lanka;LKR;CSE All-Share
+Taiwan;TWD;Taiwan Weighted,TPEx 50
+Thailand;THB;SET
+Vietnam;VND;HNX 30,VN 30
