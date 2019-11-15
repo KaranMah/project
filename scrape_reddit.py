@@ -10,7 +10,7 @@ class scrape_reddit(object):
         # self.latest_date = datetime.datetime.now().strftime("%d/%m/%Y")
         self.limit = 100
         self.subreddit = None
-        self.filter = ['url', 'author', 'title', 'subreddit']
+        self.filter = ['url', 'author', 'title','submission', 'subreddit']
 
     def search_date(self, start_date=None, end_date=None):
         dates = []
