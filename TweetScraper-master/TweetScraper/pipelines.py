@@ -6,6 +6,7 @@ import pymongo
 import json
 import os
 
+
 # for mysql
 import mysql.connector
 from mysql.connector import errorcode
@@ -178,7 +179,6 @@ class SaveToFilePipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, Tweet):
             savePath = os.path.join(self.saveTweetPath, '_'.join(item['query'].replace(':',' ').split(' ')))
-            print(item['datetime'])
             # if os.path.isfile(savePath):
             #     pass # simply skip existing items
             #     ### or you can rewrite the file, if you don't want to skip:

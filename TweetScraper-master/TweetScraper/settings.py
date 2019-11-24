@@ -16,6 +16,12 @@ ITEM_PIPELINES = {
     #'TweetScraper.pipelines.SavetoMySQLPipeline':100, # replace `SaveToFilePipeline` with this to use MySQL
 }
 
+# settings for concurrency
+CONCURRENT_ITEMS = 100 # default
+CONCURRENT_REQUESTS = 16 # default
+CONCURRENT_REQUESTS_PER_DOMAIN = 8 # default
+
+
 # settings for where to save data on disk
 SAVE_TWEET_PATH = './Data/tweet/'
 SAVE_USER_PATH = './Data/user/'
