@@ -22,4 +22,5 @@ then
     output="$output;#$query since:$new_from until:$yesterday"
   fi
 fi
+
 echo $output
