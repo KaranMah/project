@@ -22,16 +22,18 @@ class SaveToMongoPipeline(object):
     ''' pipeline that save data to mongodb '''
     def __init__(self):
         connection = pymongo.MongoClient(SETTINGS['MONGODB_SERVER'], SETTINGS['MONGODB_PORT'])
-        db = connection[SETTINGS['MONGODB_DB']]
-        self.tweetCollection = db[SETTINGS['MONGODB_TWEET_COLLECTION']]
-        self.userCollection = db[SETTINGS['MONGODB_USER_COLLECTION']]
+        self.db = connection[SETTINGS['MONGODB_DB']]
+        self.tweetCollection = self.db[SETTINGS['MONGODB_TWEET_COLLECTION']]
+        self.userCollection = self.db[SETTINGS['MONGODB_USER_COLLECTION']]
         self.tweetCollection.ensure_index([('ID', pymongo.ASCENDING)], unique=True, dropDups=True)
         self.userCollection.ensure_index([('ID', pymongo.ASCENDING)], unique=True, dropDups=True)
 
 
     def process_item(self, item, spider):
         if isinstance(item, Tweet):
-            dbItem = self.tweetCollection.find_one({'ID': item['ID']})
+            print(item['datetime'])
+            collection = ' '.join(item['query'].replace(':', ' ').split(' '))
+            dbItem = self.db[collection].find_one({'ID': item['ID']})
             if dbItem:
                 pass # simply skip existing items
                 ### or you can update the tweet, if you don't want to skip:
@@ -39,7 +41,7 @@ class SaveToMongoPipeline(object):
                 # self.tweetCollection.save(dbItem)
                 # logger.info("Update tweet:%s"%dbItem['url'])
             else:
-                self.tweetCollection.insert_one(dict(item))
+                self.db[collection].insert_one(dict(item))
                 logger.debug("Add tweet:%s" %item['url'])
 
         elif isinstance(item, User):
@@ -178,7 +180,7 @@ class SaveToFilePipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, Tweet):
             savePath = os.path.join(self.saveTweetPath, '_'.join(item['query'].replace(':',' ').split(' ')))
-            print(item['datetime'])
+            # print(item['datetime'])
             # if os.path.isfile(savePath):
             #     pass # simply skip existing items
             #     ### or you can rewrite the file, if you don't want to skip:
