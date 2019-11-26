@@ -18,6 +18,9 @@ queries = [x.strip() for x in queries]
 new_queries = []
 for query in queries:
     query_file = '_'.join(query.replace(':', ' ').split(' '))
+    print(query)
+    print(query_file)
+    print()
     if(os.path.exists("TweetScraper-master/Data/tweet/"+query_file)):
         out = subprocess.Popen(['tail '+"TweetScraper-master/Data/tweet/"+query_file+' -c 200'],
                     stdout=subprocess.PIPE,
