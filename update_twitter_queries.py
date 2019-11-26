@@ -19,7 +19,7 @@ for query in queries:
         to_date = today
 
     if(query[0] != '!'):
-        from_date = query.split(' ')[1].split(':')[1]
+        from_date = (query.split(' ')[1]).split(':')[1]
 
     if(query[0] =='$'):
         from_date = query.split(' ')[1].split(':')[1]

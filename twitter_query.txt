@@ -65,7 +65,7 @@ $#noynoyaquino since:2010-06-30 until:2016-06-30
 !#RRD_Davao since:2016-06-30 until:2019-10-26
 #Singapore since:2010-01-01 until:2019-10-26
 !#leehsienloong since:2010-01-01 until:2019-10-26
-#South Korea since:2010-01-01 until:2019-10-26
+#SouthKorea since:2010-01-01 until:2019-10-26
 #Busan since:2010-01-01 until:2019-10-26
 $#PresidentLee since:2010-01-01 until:2013-02-25
 $#GH_PARK since:2013-02-25 until:2017-03-10
