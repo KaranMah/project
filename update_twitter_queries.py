@@ -19,7 +19,7 @@ for query in queries:
     from_date = "2010-01-01"
     today = datetime.today().strftime("%Y-%m-%d")
     to_date = "2020-01-01"
-./
+    
     if(datetime.strptime(today, "%Y-%m-%d") < datetime.strptime(to_date, "%Y-%m-%d")):
         to_date = today
 
@@ -31,26 +31,17 @@ for query in queries:
         to_date = datetime.strftime(datetime.strptime(query.split(' ')[1].split(':')[1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d")
 
     query_file = '_'.join(query.strip("*!$").replace(':', ' ').split(' '))
-    if(os.path.exists("TweetScraper-master/Data/tweet/"+query_file)):
-        out = os.popen('tail '+"TweetScraper-master/Data/tweet/"+query_file+' -c 200')
+    if(os.path.exists("/data/"+query_file)):
+        out = os.popen('tail '+"/data/"+query_file+' -c 200')
         oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
         if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
             new_q = ':'.join(query.split(':')[:-1]) + ":" + datetime.strftime(datetime.strptime(oldest, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append(new_q)
+            new_queries.append('$' + new_q)
             done = True
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
             new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[-1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
             done = True
-    elif(os.path.exists("/data/"+query_file)):
-        out = os.popen('tail '+"/data/"+query_file+' -c 200')
-        oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
-        if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
-            new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[-1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append(new_q)
-            done = True
-        else:
-            newqueries.append('*'+query.strip("*!$"))
     else:
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
             new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[1].split(' ')[0], "%Y-%m-%d"), "%Y-%m-%d") + " until:"
