@@ -31,7 +31,7 @@ for query in queries:
         to_date = datetime.strftime(datetime.strptime(query.split(' ')[1].split(':')[1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d")
 
     query_file = '_'.join(query.strip("*!$").replace(':', ' ').split(' '))
-    if(query[0] != '*' and os.path.exists("/data/"+query_file)):
+    if(os.path.exists("/data/"+query_file)):
         out = os.popen('tail '+"/data/"+query_file+' -c 200')
         oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
         if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
@@ -53,7 +53,7 @@ for query in queries:
             done = True
         else:
             new_queries.append(query)
-    if(!done):
+    if(done==False):
         new_queries.append('*' + query)
 
 with open(file[:-4]+'_v2.txt', 'w') as f:
