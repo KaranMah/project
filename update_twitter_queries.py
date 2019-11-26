@@ -33,3 +33,8 @@ for query in queries:
         pass
         new_queries.append(query)
 print(new_queries)
+
+with open('twitter_query_v2.txt', 'w') as f:
+    for query in new_queries:
+        f.write(query)
+f.close()
