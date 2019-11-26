@@ -2,4 +2,4 @@ Data/
 pyenv/
 
 *.pyc
-nohup*
+nohup*.out
