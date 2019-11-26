@@ -13,4 +13,3 @@ dest = parser.parse_args().dest
 
 files = os.popen('ls '+dest+' | grep -E "nohup"').read()
 queries = [x[6:-4] for x in files]
-print(queries)
