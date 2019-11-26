@@ -178,7 +178,7 @@ class SaveToFilePipeline(object):
     def process_item(self, item, spider):
         if isinstance(item, Tweet):
             savePath = os.path.join(self.saveTweetPath, '_'.join(item['query'].replace(':',' ').split(' ')))
-            print(item['datetime'])
+            # print(item['datetime'])
             # if os.path.isfile(savePath):
             #     pass # simply skip existing items
             #     ### or you can rewrite the file, if you don't want to skip:
@@ -186,7 +186,7 @@ class SaveToFilePipeline(object):
             #     # logger.info("Update tweet:%s"%dbItem['url'])
             # else:
             self.save_to_file(item,savePath)
-            logger.debug("Add tweet:%s" %item['url'])
+            logger.debug("Add tweet:%s" %item['datetime'])
 
         elif isinstance(item, User):
             savePath = os.path.join(self.saveUserPath, item['ID'])
