@@ -38,7 +38,7 @@ for query in queries:
             new_queries.append(new_q)
     else:
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
-            new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[1].split(' ')[0], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
+            new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[1].split(' ')[0], "%Y-%m-%d"), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
         else:
             new_queries.append(query)
