@@ -1,10 +1,15 @@
 import re
 import os
 import sys
+import argparse
 import subprocess
 from datetime import datetime, timedelta
 
-with open('twitter_query.txt', 'r') as f:
+parser = argparse.ArgumentParser(description='Script to update twitter queries')
+parser.add_argument('--queries', action="store", default="twitter_query.txt", dest="filename", help="Enter file name")
+file = parser.parse_args().filename
+
+with open(file, 'r') as f:
     queries = f.readlines()
 
 queries = [x.strip() for x in queries]
@@ -58,7 +63,7 @@ for query in queries:
         else:
             new_queries.append(query)
 
-with open('twitter_query_v2.txt', 'w') as f:
+with open(file+'.txt', 'w') as f:
     for query in new_queries:
         f.write(query)
         f.write('\n')
