@@ -188,7 +188,7 @@ class SaveToFilePipeline(object):
             #     # logger.info("Update tweet:%s"%dbItem['url'])
             # else:
             self.save_to_file(item,savePath)
-            logger.debug("Add tweet:%s" %item['url'])
+            logger.debug("Add tweet:%s" %item['datetime'])
 
         elif isinstance(item, User):
             savePath = os.path.join(self.saveUserPath, item['ID'])
