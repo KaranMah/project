@@ -63,3 +63,9 @@ with open('twitter_query_v2.txt', 'w') as f:
         f.write(query)
         f.write('\n')
 f.close()
+
+print("Queries have been updated!")
+print("Key: ")
+print("! Incumbent Head of state")
+print("$ Previous Head of state")
+print("* Completed query")
