@@ -19,7 +19,7 @@ for query in queries:
     from_date = "2010-01-01"
     today = datetime.today().strftime("%Y-%m-%d")
     to_date = "2020-01-01"
-
+./
     if(datetime.strptime(today, "%Y-%m-%d") < datetime.strptime(to_date, "%Y-%m-%d")):
         to_date = today
 
@@ -63,7 +63,7 @@ for query in queries:
         else:
             new_queries.append(query)
 
-with open(file+'.txt', 'w') as f:
+with open(file[:-4]+'_v2.txt', 'w') as f:
     for query in new_queries:
         f.write(query)
         f.write('\n')
