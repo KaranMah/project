@@ -35,8 +35,9 @@ $#hatoyamayukio since:2010-01-01 until:2010-06-08
 $#NaotoKan since:2010-06-08 until:2011-09-02
 $#NODAYOSHI55 since:2011-09-02 until:2012-12-26
 !#AbeShinzo since:2012-12-26 until:2019-11-25
-#Malaysia since:2010-01-01 until:2015-06-09
+$#Malaysia since:2010-01-01 until:2015-06-09
 #Malaysia since:2019-10-27 until:2019-11-25
+$#KualaLumpur since:2010-01-01 until:2010-01-01
 #KualaLumpur since:2019-10-27 until:2019-11-25
 $#NajibRazak since:2010-01-01 until:2018-05-10
 !#chedetofficial since:2018-05-10 until:2019-11-25
@@ -59,7 +60,7 @@ $#RajaPervaizAshraf since:2012-06-22 until:2013-03-24
 $#NawazSharif since:2013-06-05 until:2017-07-28
 $#SKhaqanAbbasi since:2017-08-01 until:2018-05-31
 !#ImranKhanPTI since:2018-08-18 until:2019-11-25
-#Philippines since:2010-01-01 until:2017-11-26
+$#Philippines since:2010-01-01 until:2017-11-26
 #Philippines since:2019-10-27 until:2019-11-25
 #Manila since:2019-10-27 until:2019-11-25
 $#gmarroyo since:2010-01-01 until:2010-06-30
@@ -68,6 +69,7 @@ $#noynoyaquino since:2010-06-30 until:2016-06-30
 #Singapore since:2010-01-01 until:2019-11-25
 !#leehsienloong since:2010-01-01 until:2019-11-25
 #SouthKorea since:2010-01-01 until:2019-11-25
+$#Busan since:2010-01-01 until:2010-01-04
 #Busan since:2019-10-27 until:2019-11-25
 $#PresidentLee since:2010-01-01 until:2013-02-25
 $#GH_PARK since:2013-02-25 until:2017-03-10
