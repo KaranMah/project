@@ -4,46 +4,57 @@ import sys
 import subprocess
 from datetime import datetime, timedelta
 
-from_date = "2010-01-01"
-today = datetime.today().strftime("%Y-%m-%d")
-to_date = "2019-12-31"
-
-if(datetime.strptime(today, "%Y-%m-%d") < datetime.strptime(to_date, "%Y-%m-%d")):
-    to_date = today
-
 with open('twitter_query.txt', 'r') as f:
     queries = f.readlines()
 
 queries = [x.strip() for x in queries]
 new_queries = []
 for query in queries:
-    query_file = '_'.join(query.replace(':', ' ').split(' '))
+    done = False
+    from_date = "2010-01-01"
+    today = datetime.today().strftime("%Y-%m-%d")
+    to_date = "2020-01-01"
+
+    if(datetime.strptime(today, "%Y-%m-%d") < datetime.strptime(to_date, "%Y-%m-%d")):
+        to_date = today
+
+    if(query[0] != '!'):
+        from_date = query.split(' ')[1].split(':')[1]
+
+    if(query[0] =='$'):
+        from_date = query.split(' ')[1].split(':')[1]
+        to_date = datetime.strftime(datetime.strptime(query.split(' ')[1].split(':')[1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d")
+
+    query_file = '_'.join(query.strip("*!$").replace(':', ' ').split(' '))
     if(os.path.exists("TweetScraper-master/Data/tweet/"+query_file)):
         out = os.popen('tail '+"TweetScraper-master/Data/tweet/"+query_file+' -c 200')
         oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
         if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
             new_q = ':'.join(query.split(':')[:-1]) + ":" + datetime.strftime(datetime.strptime(oldest, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
+            done = True
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
             new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[-1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
+            done = True
     elif(os.path.exists("/data/"+query_file)):
         out = os.popen('tail '+"/data/"+query_file+' -c 200')
         oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
-        if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
-            new_q = ':'.join(query.split(':')[:-1]) + ":" + datetime.strftime(datetime.strptime(oldest, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append(new_q)
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
             new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[-1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
+            done = True
+        else:
+            newqueries.append('*'+query.strip("*!$"))
     else:
         if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
             new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[1].split(' ')[0], "%Y-%m-%d"), "%Y-%m-%d") + " until:"
             if(query[0] == '$'):
-                new_q = '$' + new_q + query.split(':')[-1]
+                new_q += query.split(':')[-1]
             else:
                 new_q += datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
+            done = True
         else:
             new_queries.append(query)
 
