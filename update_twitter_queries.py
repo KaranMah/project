@@ -22,11 +22,8 @@ for query in queries:
     print(query_file)
     print()
     if(os.path.exists("TweetScraper-master/Data/tweet/"+query_file)):
-        out = subprocess.Popen(['tail '+"TweetScraper-master/Data/tweet/"+query_file+' -c 200'],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT)
-        stdout, stderr = out.communicate()
-        oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", stdout).group()
+        out = os.popen('tail '+"TweetScraper-master/Data/tweet/"+query_file+' -c 200')
+        oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out)
         if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
             new_q = query.split(':')[:-1] + ":" + datetime.strftime(datetime.strptime(oldest, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
             new_queries.append(new_q)
