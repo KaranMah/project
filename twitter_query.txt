@@ -1,5 +1,5 @@
-#United States since:2010-01-01 until:2019-10-26
-#New York since:2010-01-01 until:2019-10-26
+#UnitedStates since:2010-01-01 until:2019-10-26
+#NewYork since:2010-01-01 until:2019-10-26
 #BarackObama since:2010-01-01 until:2017-01-20
 #realDonaldTrump since:2017-01-20 until:2021-01-20
 #Australia since:2010-01-01 until:2019-10-26
@@ -17,8 +17,7 @@
 #Shanghai since:2010-01-01 until:2019-10-26
 #hujintao since:2010-01-01 until:2013-03-14
 #XiJingpingReal since:2013-03-14 until:2019-10-26
-#Hong Kong since:2010-01-01 until:2019-10-26
-#Hong Kong since:2010-01-01 until:2019-10-26
+#HongKong since:2010-01-01 until:2019-10-26
 #DonaldTsang since:2010-01-01 until:2012-06-30
 #cy_iwon since:2012-07-01 until:2017-06-30
 #CarrieLam since:2017-07-01 until:2019-10-26
@@ -37,7 +36,7 @@
 #NODAYOSHI55 since:2011-09-02 until:2012-12-26
 #AbeShinzo since:2012-12-26 until:2019-10-26
 #Malaysia since:2010-01-01 until:2019-10-26
-#Kuala Lumpur since:2010-01-01 until:2019-10-26
+#KualaLumpur since:2010-01-01 until:2019-10-26
 #NajibRazak since:2010-01-01 until:2018-05-10
 #chedetofficial since:2018-05-10 until:2019-10-26
 #Mongolia since:2010-01-01 until:2019-10-26
@@ -47,7 +46,7 @@
 #Saikhanbileg since:2014-11-21 until:2016-07-07
 #erdenebat since:2016-07-07 until:2017-10-04
 #khurelsukh since:2017-10-04 until:2019-10-26
-#New Zealand since:2010-01-01 until:2019-10-26
+#NewZealand since:2010-01-01 until:2019-10-26
 #Wellington since:2010-01-01 until:2019-10-26
 #RtHon_JohnKey since:2010-01-01 until:2016-12-12
 #RtHonBEnglish since:2016-12-12 until:2017-10-26
@@ -55,7 +54,7 @@
 #Pakistan since:2010-01-01 until:2019-10-26
 #Karachi since:2010-01-01 until:2019-10-26
 #YRGillani since:2010-01-01 until:2012-06-19
-#Raja Pervaiz Ashraf since:2012-06-22 until:2013-03-24
+#RajaPervaizAshraf since:2012-06-22 until:2013-03-24
 #NawazSharif since:2013-06-05 until:2017-07-28
 #SKhaqanAbbasi since:2017-08-01 until:2018-05-31
 #ImranKhanPTI since:2018-08-18 until:2019-10-26
@@ -65,14 +64,13 @@
 #noynoyaquino since:2010-06-30 until:2016-06-30
 #RRD_Davao since:2016-06-30 until:2019-10-26
 #Singapore since:2010-01-01 until:2019-10-26
-#Singapore since:2010-01-01 until:2019-10-26
 #leehsienloong since:2010-01-01 until:2019-10-26
 #South Korea since:2010-01-01 until:2019-10-26
 #Busan since:2010-01-01 until:2019-10-26
 #PresidentLee since:2010-01-01 until:2013-02-25
 #GH_PARK since:2013-02-25 until:2017-03-10
 #moonriver365 since:2017-05-10 until:2019-10-26
-#Sri Lanka since:2010-01-01 until:2019-10-26
+#SriLanka since:2010-01-01 until:2019-10-26
 #Colombo since:2010-01-01 until:2019-10-26
 #PresRajapaksa since:2010-01-01 until:2015-01-09
 #MaithripalaS since:2015-01-09 until:2019-10-26
@@ -86,6 +84,6 @@
 #PouYingluck since:2011-08-05 until:2014-05-07
 #prayutofficial since:2014-05-22 until:2019-10-26
 #Vietnam since:2010-01-01 until:2019-10-26
-#Ho Chi Minh City since:2010-01-01 until:2019-10-26
+#HoChiMinhCity since:2010-01-01 until:2019-10-26
 #nguyentandung since:2010-01-01 until:2016-04-06
 #nguyenxuanphuc0 since:2016-04-07 until:2019-10-26
