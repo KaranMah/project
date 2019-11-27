@@ -12,49 +12,28 @@ file = parser.parse_args().filename
 with open(file, 'r') as f:
     queries = f.readlines()
 
+yesterday = datetime.today()-timedelta(days=1)
+
 queries = [x.strip() for x in queries]
-new_queries = []
+new_queries = queries
 for query in queries:
-    done = False
-    from_date = "2010-01-01"
-    today = datetime.today().strftime("%Y-%m-%d")
-    to_date = "2020-01-01"
-
-    if(datetime.strptime(today, "%Y-%m-%d") < datetime.strptime(to_date, "%Y-%m-%d")):
-        to_date = today
-
-    if(query[0] == '!'):
-        from_date = (query.split(' ')[1]).split(':')[1]
-
-    if(query[0] =='$'):
-        from_date = query.split(' ')[1].split(':')[1]
-        to_date = datetime.strftime(datetime.strptime(query.split(' ')[1].split(':')[1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d")
-
-    query_file = '_'.join(query.strip("*!$").replace(':', ' ').split(' '))
-    if(os.path.exists("/data/"+query_file)):
-        out = os.popen('tail '+"/data/"+query_file+' -c 200')
-        oldest = re.search(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", out.read()).group()
-        if(datetime.strptime(oldest, "%Y-%m-%d") > datetime.strptime(from_date, "%Y-%m-%d")):
-            new_q = ':'.join(query.split(':')[:-1]) + ":" + datetime.strftime(datetime.strptime(oldest, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append('$' + new_q)
-            done = True
-        if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
-            new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[-1], "%Y-%m-%d")+timedelta(days=1), "%Y-%m-%d") + " until:" +  datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append(new_q)
-            done = True
+    temp_query = query.strip("?!*!$")
+    filename = ' '.join(temp_query.replace(':', ' ').split(' '))
+    if(os.path.exists("TweetScraper/Data/"+temp_query)):
+        query = '*' + query[1:]
+    elif(os.path.exists("/data/"+temp_query)):
+        query = '&' + query[1:]
+    last_date = datetime.strptime(query.split(' ')[2].split(':')[1], "%Y-%m-%d")+timedelta(days=1)
+    if((today-last_date).days > 0):
+        new_q = "?!" + query[2:].split(' ')[0] + " since:"+datetime.strptime(last_date, "%Y-%m-%d") + " until:" + datetime.strptime(yesterday, "%Y-%m-%d")
+    if(query[1] == '$'):
+        pass
+    elif(query[0] != '?'):
+        new_queries.append(new_q)
     else:
-        if(datetime.strptime(query.split(':')[-1], "%Y-%m-%d") < (datetime.strptime(to_date, "%Y-%m-%d")-timedelta(days=1))):
-            new_q = query.split(':')[0] + ":" + datetime.strftime(datetime.strptime(query.split(':')[1].split(' ')[0], "%Y-%m-%d"), "%Y-%m-%d") + " until:"
-            if(query[0] == '$'):
-                new_q += query.split(':')[-1]
-            else:
-                new_q += datetime.strftime(datetime.strptime(today, "%Y-%m-%d")-timedelta(days=1), "%Y-%m-%d")
-            new_queries.append(new_q)
-            done = True
-        else:
-            new_queries.append(query)
-    if(done==False):
-        new_queries.append('*' + query)
+        new_q = query.split(' ')[0] + query.split(' ')[1] + " until:" + datetime.strptime(yesterday, "%Y-%m-%d")
+        new_queries.append(new_q)
+
 
 with open(file[:-4]+'_v2.txt', 'w') as f:
     for query in new_queries:
@@ -64,6 +43,8 @@ f.close()
 
 print("Queries have been updated!")
 print("Key: ")
-print("! Incumbent Head of state")
-print("$ Previous Head of state")
-print("* Completed query")
+print("! Incumbent query")
+print("$ Fixed date query")
+print("* Running query")
+print("$ Done query")
+print("? Yet to run query")
