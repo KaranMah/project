@@ -47,7 +47,7 @@ for file in files_array:
         print("Moved data file...")
         os.open('rm '+log+'/'+file)
         print("Removed nohup file...")
-
+        print()
 
 with open('twitter_query_v2.txt', 'w') as f:
     for query in queries:

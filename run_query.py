@@ -21,7 +21,7 @@ while(True):
     else:
         print("The query to be run is " + q + "...")
         query = q[2:].split(' ')[0]
-        os.popen('nohup scrapy crawl TweetScraper -a query="'+q[2:]+'" & > nohup'+query+'.out &')
+        os.popen('nohup scrapy crawl TweetScraper -a query="'+q[2:]+'" & >  /Data/log/nohup'+query+'.out &')
         print("Running query...")
         q = '*' + q[1:]
         queries.append(q)
