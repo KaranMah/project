@@ -1,11 +1,3 @@
-?!#UnitedStates since:2010-01-01 until:2019-10-26
-?!#NewYork since:2010-01-01 until:2019-10-26
-?$#BarackObama since:2010-01-01 until:2017-01-20
-?!#realDonaldTrump since:2017-01-20 until:2021-01-20
-?!#Australia since:2010-01-01 until:2019-10-26
-?!#Sydney since:2010-01-01 until:2019-10-26
-?$#MrKRudd since:2010-01-01 until:2010-06-24
-?$#JuliaGillard since:2010-06-24 until:2013-06-27
 ?$#MrKRudd since:2013-06-27 until:2013-09-18
 ?$#HonTonyAbbott since:2013-09-18 until:2015-09-15
 ?$#TurnbullMalcolm since:2015-09-15 until:2018-08-24
@@ -87,3 +79,11 @@
 ?!#HoChiMinhCity since:2010-01-01 until:2019-10-26
 ?$#nguyentandung since:2010-01-01 until:2016-04-06
 ?!#nguyenxuanphuc0 since:2016-04-07 until:2019-10-26
+&!#UnitedStates since:2010-01-01 until:2019-10-26
+&!#realDonaldTrump since:2017-01-20 until:2019-11-26
+*!#NewYork since:2010-01-01 until:2019-10-26
+*$#BarackObama since:2010-01-01 until:2017-01-20
+*!#Australia since:2010-01-01 until:2019-10-26
+*!#Sydney since:2010-01-01 until:2019-10-26
+*$#MrKRudd since:2010-01-01 until:2010-06-24
+*$#JuliaGillard since:2010-06-24 until:2013-06-27
