@@ -39,7 +39,7 @@ for file_name in files_array:
         queries.remove(query_match)
         done_query = '&'+ (query_match.split(' ')[0] + " since:" + new_from +" "+ query_match.split(' ')[2])[1:]
         if(from_date != new_from):
-            os.popen('mv '+source+'/'+data_filename+' '+source+'/'+data_filename.replace(from_data, new_from))
+            os.popen('mv '+source+'/'+data_filename+' '+source+'/'+data_filename.replace(from_date, new_from))
             print("Renamed data file...")
         else:
             print("File name is the same...")
@@ -55,7 +55,7 @@ for file_name in files_array:
         print("Removed nohup file...")
         print()
 
-with open('twitter_query_v2.txt', 'w') as f:
+with open('twitter_query.txt', 'w') as f:
     for query in queries:
         f.write(query)
         f.write('\n')

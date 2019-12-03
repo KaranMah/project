@@ -19,7 +19,7 @@ while(True):
     queries = queries[1:]
     print("Checking query "+q)
     if(q[0] in ['*', '&']):
-        queries.append(q)
+        queries.append(q+'\n')
         continue
     else:
         print("The query to be run is " + q[2:] + "...")
