@@ -57,7 +57,7 @@ while (True):
         if(len(files) == 0):
             print("The query hasn't been run before...")
             os.system('pwd')
-            os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+query+'.out &')
+            os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
             print("Running query "+query+" from "+start_date+" till "+end_date)
             break
         else:
@@ -69,11 +69,11 @@ while (True):
             print("Dates collected previously are from "+earliest_date+" up to "+latest_date+"...")
             if(datetime.strptime(earliest_date, "%d/%m/%Y") > datetime.strptime(start_date, "%d/%m/%Y")):
                 new_end = (datetime.strptime(earliest_date, "%d/%m/%Y")-timedelta(days=1)).strftime("%d/%m/%Y")
-                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+query+'.out &')
+                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+start_date+" till "+new_end)
                 break
             else:
                 new_start = (datetime.strptime(latest_date, "%d/%m/%Y")+timedelta(days=1)).strftime("%d/%m/%Y")
-                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+query+'.out &')
+                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+new_start+" till "+end_date)
                 break
