@@ -5,7 +5,7 @@ api = PushshiftAPI()
 
 class scrape_reddit(object):
     def __init__(self, limit=None, earliest_date=None, latest_date=None):
-        self.earliest_date = '26/9/2019'
+        self.earliest_date = '01/01/2019'
         self.latest_date = '26/10/2019'
         # self.latest_date = datetime.datetime.now().strftime("%d/%m/%Y")
         self.limit = 100
@@ -28,6 +28,7 @@ class scrape_reddit(object):
     def scrape_subreddit(self,dates):
         data = []
         for i in range(len(dates)-1):
+            print(dates[i])
             data.append(list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit='hongkong',filter=self.filter, limit=self.limit)))
         #data.append(list(api.search_submissions(after=int(dates[i].timestamp()), subreddit='hongkong',filter=self.filter, limit=self.limit)))
         with open('reddit_results.txt', 'w', encoding='utf-8') as f:
