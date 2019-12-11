@@ -4,6 +4,7 @@ import sys
 import shlex
 import argparse
 import subprocess
+from psaw import PushshiftAPI
 from datetime import datetime, timedelta
 
 def sort_order(a, b):
@@ -45,6 +46,7 @@ while (True):
     runningobj = os.popen('ls '+log)
     files_obj = runningobj.read()
     files_array = files_obj.strip('\n').split('\n')
+    print(files_array)
     if(logfile_name in files_array):
         print("The query is currently running...")
         continue
@@ -58,7 +60,7 @@ while (True):
         if(len(files) == 0):
             print("The query hasn't been run before...")
             os.system('pwd')
-            os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
+            os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
             print("Running query "+query+" from "+start_date+" till "+end_date)
             break
         else:
