@@ -3,13 +3,24 @@ from psaw import PushshiftAPI
 
 api = PushshiftAPI()
 
-class scrape_reddit(object):
-    def __init__(self, limit=None, earliest_date=None, latest_date=None):
-        self.earliest_date = '01/01/2019'
-        self.latest_date = '26/10/2019'
-        # self.latest_date = datetime.datetime.now().strftime("%d/%m/%Y")
+parser = argparse.ArgumentParser(description='Reddit scraper')
+parser.add_argument('--query', action="store", dest="subreddit", help="Enter file name", required=True)
+parser.add_argument('--start', action="store", default="01/01/2010", dest="start", help="Enter start date dd/mm/yyyy", required=True)
+parser.add_argument('--end', action="store", default=yesterday, dest="end", help="Enter end date dd/mm/yyyy", required=True)
+parser.add_argument('--data', action="store", default="Reddit_data/subreddit/", dest="data", help="Enter files destination")
+
+subreddit = parser.parse_args().subreddit
+start_date = parser.parse_args().start
+end_date = parser.parse_args().end
+data = parser.parse_args().data
+
+class RedditScraper(object):
+    def __init__(self,  api, subreddit, earliest_date, latest_date, limit=None):
+        self.earliest_date = earliest_date
+        self.latest_date = latest_date
         self.limit = 100
-        self.subreddit = None
+        self.subreddit = subreddit
+        self.api = api
         self.filter = ['url', 'author', 'title','submission', 'subreddit']
 
     def search_date(self, start_date=None, end_date=None):
@@ -27,15 +38,16 @@ class scrape_reddit(object):
 
     def scrape_subreddit(self,dates):
         data = []
+        print("Scraping for query "+self.subreddit+" from "+self.earliest_date+" to "+self.latest_date)
         for i in range(len(dates)-1):
-            print(dates[i])
-            data.append(list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit='hongkong',filter=self.filter, limit=self.limit)))
-        #data.append(list(api.search_submissions(after=int(dates[i].timestamp()), subreddit='hongkong',filter=self.filter, limit=self.limit)))
-        with open('reddit_results.txt', 'w', encoding='utf-8') as f:
+            if(i % 100 == 0):
+                print(dates[i])
+            data.append(list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)))
+        with open(data+query, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)
 
 
-scraper = scrape_reddit()
+scraper = RedditScraper(api, subreddit, start_date, end_date)
 dates = scraper.search_date()
 scraper.scrape_subreddit(dates)

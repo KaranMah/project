@@ -6,7 +6,7 @@ import argparse
 import subprocess
 from datetime import datetime, timedelta
 
-parser = argparse.ArgumentParser(description='Script to update twitter queries')
+parser = argparse.ArgumentParser(description='Script to run twitter queries')
 parser.add_argument('--queries', action="store", default="twitter_query.txt", dest="filename", help="Enter file name")
 file_name = parser.parse_args().filename
 
