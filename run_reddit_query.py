@@ -39,6 +39,7 @@ with open(file_name, 'r') as f:
 
 while (True):
     query = queries.pop()
+    queries.append(query)
     print("Checking if query is running")
     logfile_name = "nohup"+query+".out"
     runningobj = os.popen('ls '+log)
@@ -72,8 +73,14 @@ while (True):
                 os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+start_date+" till "+new_end)
                 break
-            else:
+            elif(datetime.strptime(latest_date, "%d/%m/%Y") < datetime.strptime(yesterday, "%d/%m/%Y")):
                 new_start = (datetime.strptime(latest_date, "%d/%m/%Y")+timedelta(days=1)).strftime("%d/%m/%Y")
                 os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+new_start+" till "+end_date)
                 break
+
+
+with open(file_name, 'w') as f:
+    for q in queries:
+        f.write(q)
+        f.write("\n")

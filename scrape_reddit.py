@@ -46,6 +46,7 @@ class RedditScraper(object):
         with open(data+query, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)
+        print("Completed")
 
 
 scraper = RedditScraper(api, subreddit, start_date, end_date)
