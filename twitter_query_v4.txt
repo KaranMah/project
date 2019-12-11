@@ -95,5 +95,4 @@
 &!#sheikhhasina since:2011-01-27 until:2019-10-26
 ?$#sheikhhasina since:2010-01-01 until:2011-01-26
 &!#China since:2018-09-01 until:2019-10-26
-?$#China since:2010-01-01 until:2018-02-27
-&$#China since:2018-02-28 until:2018-08-31
+*$#China since:2010-01-01 until:2018-08-31
