@@ -1,3 +1,4 @@
+import argparse
 import datetime
 from psaw import PushshiftAPI
 
@@ -5,8 +6,8 @@ api = PushshiftAPI()
 
 parser = argparse.ArgumentParser(description='Reddit scraper')
 parser.add_argument('--query', action="store", dest="subreddit", help="Enter file name", required=True)
-parser.add_argument('--start', action="store", default="01/01/2010", dest="start", help="Enter start date dd/mm/yyyy", required=True)
-parser.add_argument('--end', action="store", default=yesterday, dest="end", help="Enter end date dd/mm/yyyy", required=True)
+parser.add_argument('--start', action="store", dest="start", help="Enter start date dd/mm/yyyy", required=True)
+parser.add_argument('--end', action="store",  dest="end", help="Enter end date dd/mm/yyyy", required=True)
 parser.add_argument('--data', action="store", default="Reddit_data/subreddit/", dest="data", help="Enter files destination")
 
 subreddit = parser.parse_args().subreddit
@@ -50,5 +51,6 @@ class RedditScraper(object):
 
 
 scraper = RedditScraper(api, subreddit, start_date, end_date)
+print(scraper.subreddit, scraper.earliest_date, scraper.latest_date)
 dates = scraper.search_date()
 scraper.scrape_subreddit(dates)

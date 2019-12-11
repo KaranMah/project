@@ -59,7 +59,6 @@ while (True):
         files = list(filter(lambda x: ("r/"+query) in x, done_queries))
         if(len(files) == 0):
             print("The query hasn't been run before...")
-            os.system('pwd')
             os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
             print("Running query "+query+" from "+start_date+" till "+end_date)
             break
