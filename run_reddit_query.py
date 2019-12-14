@@ -65,17 +65,17 @@ while (True):
             print("The query has been run before...")
             print("Calculating remaining dates to run for...")
             sorted_files = sorted(files, key=sort_order)
-            dates = list(filter(lambda x: (x.split('_')[1], x.split('_')[1]), sorted_files))
+            dates = list(map(lambda x: (x.split('_')[1], x.split('_')[1]), sorted_files))
             (earliest_date, latest_date) = (dates[0][0], dates[-1][1])
             print("Dates collected previously are from "+earliest_date+" up to "+latest_date+"...")
             if(datetime.strptime(earliest_date, "%d/%m/%Y") > datetime.strptime(start_date, "%d/%m/%Y")):
                 new_end = (datetime.strptime(earliest_date, "%d/%m/%Y")-timedelta(days=1)).strftime("%d/%m/%Y")
-                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+'nohup'+query+'.out &')
+                os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+start_date+" till "+new_end)
                 break
             elif(datetime.strptime(latest_date, "%d/%m/%Y") < datetime.strptime(yesterday, "%d/%m/%Y")):
                 new_start = (datetime.strptime(latest_date, "%d/%m/%Y")+timedelta(days=1)).strftime("%d/%m/%Y")
-                os.system('nohup python scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
+                os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+new_start+" till "+end_date)
                 break
 

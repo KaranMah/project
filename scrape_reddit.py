@@ -43,8 +43,10 @@ class RedditScraper(object):
         for i in range(len(dates)-1):
             if(i % 100 == 0):
                 print(dates[i])
-            data.append(list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)))
-        with open(data_folder+self.subreddit, 'w', encoding='utf-8') as f:
+            record = list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)))
+            if(record != []):
+                data.append(record)
+        with open(data_folder+self.subreddit+"_"+self.earliest_data+"_"+self.latest_date, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)
         print("Completed")
