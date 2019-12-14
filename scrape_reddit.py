@@ -13,7 +13,7 @@ parser.add_argument('--data', action="store", default="Reddit_data/subreddit/", 
 subreddit = parser.parse_args().subreddit
 start_date = parser.parse_args().start
 end_date = parser.parse_args().end
-data = parser.parse_args().data
+data_folder = parser.parse_args().data
 
 class RedditScraper(object):
     def __init__(self,  api, subreddit, earliest_date, latest_date, limit=None):
@@ -44,7 +44,7 @@ class RedditScraper(object):
             if(i % 100 == 0):
                 print(dates[i])
             data.append(list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)))
-        with open(data+query, 'w', encoding='utf-8') as f:
+        with open(data_folder+self.subreddit, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)
         print("Completed")

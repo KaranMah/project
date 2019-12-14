@@ -39,14 +39,13 @@ with open(file_name, 'r') as f:
     queries = [x.strip('\n') for x in f.readlines()]
 
 while (True):
-    query = queries.pop()
+    query = queries.pop(0)
     queries.append(query)
     print("Checking if query is running")
     logfile_name = "nohup"+query+".out"
     runningobj = os.popen('ls '+log)
     files_obj = runningobj.read()
     files_array = files_obj.strip('\n').split('\n')
-    print(files_array)
     if(logfile_name in files_array):
         print("The query is currently running...")
         continue

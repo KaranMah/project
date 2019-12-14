@@ -30,3 +30,12 @@ error: cannot allocate memory
 2017
 2018
 2019
+australia 20/10/2019 20/11/2019
+Scraping for query australia from 20/10/2019 to 20/11/2019
+2019-10-20 00:00:00
+Traceback (most recent call last):
+  File "scrape_reddit.py", line 56, in <module>
+    scraper.scrape_subreddit(dates)
+  File "scrape_reddit.py", line 47, in scrape_subreddit
+    with open(data+query, 'w', encoding='utf-8') as f:
+NameError: name 'query' is not defined
