@@ -3,6 +3,7 @@ import os
 import sys
 import shlex
 import argparse
+import functools
 import subprocess
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
@@ -52,10 +53,10 @@ while (True):
     else:
         print("The query is not currently running...")
         print("Checking if the query has been run before...")
-        doneobj = os.popen('ls /data | grep -E r/'+query)
+        doneobj = os.popen('ls /data | grep -E r_'+query)
         file_obj = doneobj.read()
         done_queries = file_obj.strip('\n').split('\n')
-        files = list(filter(lambda x: ("r/"+query) in x, done_queries))
+        files = list(filter(lambda x: ("r_"+query) in x, done_queries))
         if(len(files) == 0):
             print("The query hasn't been run before...")
             os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
@@ -64,17 +65,17 @@ while (True):
         else:
             print("The query has been run before...")
             print("Calculating remaining dates to run for...")
-            sorted_files = sorted(files, key=sort_order)
-            dates = list(map(lambda x: (x.split('_')[1], x.split('_')[1]), sorted_files))
+            sorted_files = sorted(files, key=functools.cmp_to_key(sort_order))
+            dates = list(map(lambda x: (x.split('_')[2], x.split('_')[3]), sorted_files))
             (earliest_date, latest_date) = (dates[0][0], dates[-1][1])
             print("Dates collected previously are from "+earliest_date+" up to "+latest_date+"...")
-            if(datetime.strptime(earliest_date, "%d/%m/%Y") > datetime.strptime(start_date, "%d/%m/%Y")):
-                new_end = (datetime.strptime(earliest_date, "%d/%m/%Y")-timedelta(days=1)).strftime("%d/%m/%Y")
+            if(datetime.strptime(earliest_date, "%d-%m-%Y") > datetime.strptime(start_date, "%d/%m/%Y")):
+                new_end = (datetime.strptime(earliest_date, "%d-%m-%Y")-timedelta(days=1)).strftime("%d/%m/%Y")
                 os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+start_date+'\" --end \"'+new_end+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+start_date+" till "+new_end)
                 break
-            elif(datetime.strptime(latest_date, "%d/%m/%Y") < datetime.strptime(yesterday, "%d/%m/%Y")):
-                new_start = (datetime.strptime(latest_date, "%d/%m/%Y")+timedelta(days=1)).strftime("%d/%m/%Y")
+            elif(datetime.strptime(latest_date, "%d-%m-%Y") < datetime.strptime(yesterday, "%d/%m/%Y")):
+                new_start = (datetime.strptime(latest_date, "%d-%m-%Y")+timedelta(days=1)).strftime("%d/%m/%Y")
                 os.system('nohup python3 scrape_reddit.py --query \"'+query+'\" --start \"'+new_start+'\" --end \"'+end_date+'\" > '+log+'nohup'+query+'.out &')
                 print("Running query "+query+" from "+new_start+" till "+end_date)
                 break

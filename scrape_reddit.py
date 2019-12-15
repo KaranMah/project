@@ -17,8 +17,8 @@ data_folder = parser.parse_args().data
 
 class RedditScraper(object):
     def __init__(self,  api, subreddit, earliest_date, latest_date, limit=None):
-        self.earliest_date = earliest_date
-        self.latest_date = latest_date
+        self.earliest_date = (datetime.datetime.strptime(earliest_date, "%d/%m/%Y")).strftime("%d-%m-%Y")
+        self.latest_date = (datetime.datetime.strptime(latest_date, "%d/%m/%Y")).strftime("%d-%m-%Y")
         self.limit = 100
         self.subreddit = subreddit
         self.api = api
@@ -28,8 +28,8 @@ class RedditScraper(object):
         dates = []
         start_date = self.earliest_date if start_date is None else start_date
         end_date = self.latest_date if end_date is None else end_date
-        start = datetime.datetime.strptime(start_date, "%d/%m/%Y")
-        end = datetime.datetime.strptime(end_date, "%d/%m/%Y")
+        start = datetime.datetime.strptime(start_date, "%d-%m-%Y")
+        end = datetime.datetime.strptime(end_date, "%d-%m-%Y")
         delta = datetime.timedelta(days=1)
         while start <= end:
             dates.append(start)
@@ -43,10 +43,10 @@ class RedditScraper(object):
         for i in range(len(dates)-1):
             if(i % 100 == 0):
                 print(dates[i])
-            record = list(api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)))
+            record = api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)
             if(record != []):
-                data.append(record)
-        with open(data_folder+self.subreddit+"_"+self.earliest_data+"_"+self.latest_date, 'w', encoding='utf-8') as f:
+                data.append([obj.d_ for obj in record])
+        with open(data_folder+self.subreddit+"_"+self.earliest_date+"_"+self.latest_date, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)
         print("Completed")
