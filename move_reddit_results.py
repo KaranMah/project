@@ -33,20 +33,17 @@ for file_name in nohup_files:
         if("Completed" in last):
             print("Scraping is completed")
             print("Locating data file for "+query+"...")
-            if(os.path.exists(data+query)):
-                print("Data file exists for "+query+"...")
-                from_date = "01-01-2010"
-                to_date = "01-01-2019"
-                file_start = os.popen('head '+data+query+' -n 1 | tail -c 20 | grep -Eo "[0-9]{10}"')
-                first_line = file_start.read()
-                from_date = (datetime.strftime(datetime.fromtimestamp(float(first_line)), "%d-%m-%Y"))
-                file_end = os.popen('tail '+data+query+' -n 1 | tail -c 20 | grep -Eo "[0-9]{10}"')
-                last_line = file_end.read()
-                to_date = (datetime.strftime(datetime.fromtimestamp(float(last_line)), "%d-%m-%Y"))
-                print("Data file for "+query+" has scraped from "+from_date+" to "+to_date)
-                perm_file = 'r_'+query+'_'+from_date+'_'+to_date
-                os.popen('mv '+data+query+' /data/'+perm_file)
-                print("Moved data file...")
-                os.popen('rm '+log+file_name)
-                print("Removed nohup file...")
-                print()
+            data_files = os.listdir(data)
+            for data_file in data_files:
+                if(query in data_file):
+                    print("Kya kar lega")
+                    print("Data file exists for "+query+"...")
+                    from_date = data_file.split('_')[1]
+                    to_date = data_file.split('_')[2]
+                    print("Data file for "+query+" has scraped from "+from_date+" to "+to_date)
+                    perm_file = 'r_'+query+'_'+from_date+'_'+to_date
+                    os.popen('mv '+data+data_file+' /data/'+perm_file)
+                    print("Moved data file...")
+                    os.popen('rm '+log+file_name)
+                    print("Removed nohup file...")
+                    print()
