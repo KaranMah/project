@@ -13,7 +13,7 @@ files = files.strip('\n').split('\n')
 def write_to_json(file, data, year):
     with open("/data/json/"+file+"?"+str(year)+".json", 'w') as f1:
         for item in data:
-            f1.write(item)
+            f1.write(json.dumps(item))
             f1.write("\n")
 
 def json_to_csv(file, data, year):
@@ -31,7 +31,6 @@ for file in files:
             data = ast.literal_eval(line)
             if(len(obj)==0):
                 obj.append(data)
-                print(obj)
             else:
                 if(datetime.strptime(data['timestamp'], "%d-%m-%Y").year == datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year):
                     obj.append(data)
