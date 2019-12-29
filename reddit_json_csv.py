@@ -1,6 +1,7 @@
 import os
 import re
 import ast
+import glob
 import json
 import shlex
 import subprocess
@@ -25,19 +26,24 @@ def json_to_csv(file, data, year):
 
 for file in files:
     obj = []
-    with open(file, 'rb') as f:
-        line = f.readline().decode()
-        while(line):
-            data = ast.literal_eval(line)
-            if(len(obj)==0):
-                obj.append(data)
-            else:
-                if(datetime.strptime(data['timestamp'], "%d-%m-%Y").year == datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year):
+    if(len(glob.glob("/data/json/"+file+"*"))>0):
+        print(file+" is done.")
+        pass
+    else:
+        print("Need to move "+file)
+        with open(file, 'rb') as f:
+            line = f.readline().decode()
+            while(line):
+                data = ast.literal_eval(line)
+                if(len(obj)==0):
                     obj.append(data)
                 else:
-                    json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
-                    write_to_json(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
-                    obj = [data]
-            line = f.readline().decode()
-        json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
-        write_to_json(file, obj,  datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+                    if(datetime.strptime(data['timestamp'], "%d-%m-%Y").year == datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year):
+                        obj.append(data)
+                    else:
+                        json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+                        write_to_json(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+                        obj = [data]
+                line = f.readline().decode()
+            json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+            write_to_json(file, obj,  datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
