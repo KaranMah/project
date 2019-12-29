@@ -10,10 +10,35 @@ file_out = os.popen('ls . | grep -E "^r_.*"')
 files = file_out.read()
 files = files.strip('\n').split('\n')
 
+def write_to_json(file, data, year):
+    with open("/data/json/"+file+"?"+str(year)+".json", 'w') as f1:
+        for item in data:
+            f1.write(item)
+            f1.write("\n")
+
+def json_to_csv(file, data, year):
+    with open("/data/csv/"+file+"?"+str(year)+".csv", 'w') as f2:
+        for item in data:
+            f2.write(item['title'])
+            f2.write("\n")
+
 
 for file in files:
+    obj = []
     with open(file, 'rb') as f:
         line = f.readline().decode()
-        data = ast.literal_eval(line)
-        print(data)
-        lol
+        while(line):
+            data = ast.literal_eval(line)
+            if(len(obj)==0):
+                obj.append(data)
+                print(obj)
+            else:
+                if(datetime.strptime(data['timestamp'], "%d-%m-%Y").year == datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year):
+                    obj.append(data)
+                else:
+                    json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+                    write_to_json(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+                    obj = [data]
+            line = f.readline().decode()
+        json_to_csv(file, obj, datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
+        write_to_json(file, obj,  datetime.strptime(obj[0]['timestamp'], "%d-%m-%Y").year)
