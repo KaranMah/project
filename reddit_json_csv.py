@@ -6,7 +6,7 @@ import shlex
 import subprocess
 from datetime import datetime, time
 
-file_out = os.popen('ls . | grep -E "^r_.*"')
+file_out = os.popen('ls /data | grep -E "^r_.*"')
 files = file_out.read()
 files = files.strip('\n').split('\n')
 
