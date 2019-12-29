@@ -9,7 +9,9 @@ do
 	end_year=$((end_year+1-1))
 	for i in $(seq $start_year $end_year)
 	do
-		echo $i
-		jq '.' $file | jq -s ".[] | select((.datetime | contains(\"$i\")) and .is_retweet==false and .is_reply==false) |  {query: .query, username: .usernameTweet, id: .ID, text: .text, nbr_retweet: .nbr_retweet, nbr_reply: .nbr_reply, nbr_favorite: .nbr_favorite, datetime: .datetime}" | jq -s . > "/data/json/$file?${i}.json"
+		if [ ! -f "/data/json/$file?${i}.json" ] then
+			echo $i
+			jq '.' $file | jq -s ".[] | select((.datetime | contains(\"$i\")) and .is_retweet==false and .is_reply==false) |  {query: .query, username: .usernameTweet, id: .ID, text: .text, nbr_retweet: .nbr_retweet, nbr_reply: .nbr_reply, nbr_favorite: .nbr_favorite, datetime: .datetime}" | jq -s . > "/data/json/$file?${i}.json"
+		fi
 	done
 done
