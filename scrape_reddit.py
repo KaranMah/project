@@ -45,7 +45,7 @@ class RedditScraper(object):
                 print(dates[i])
             record = api.search_submissions(after=int(dates[i].timestamp()), before=int(dates[i+1].timestamp()), subreddit=self.subreddit,filter=self.filter, limit=self.limit)
             if(record != []):
-                data.extend([dict(obj.d_, timestamp=dates[i]) for obj in record])
+                data.extend([dict(obj.d_, timestamp=dates[i].strftime("%d-%m-%Y")) for obj in record])
         with open(data_folder+self.subreddit+"_"+self.earliest_date+"_"+self.latest_date, 'w', encoding='utf-8') as f:
             for item in data:
                 f.write("%s\n" % item)

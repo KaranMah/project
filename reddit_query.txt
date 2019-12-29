@@ -1,6 +1,3 @@
-bombay
-indonesia
-jakarta
 japan
 tokyo
 malaysia
@@ -30,7 +27,10 @@ australia
 sydney
 bangladesh
 china
-dhaka
 shanghai
 hongkong
 india
+dhaka
+mumbai
+indonesia
+jakarta
