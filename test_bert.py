@@ -68,7 +68,8 @@ with open(jsonPath + "/" + json_file_name, 'rb') as f:
     line = f.readline().decode()
     while line:
         data = ast.literal_eval(line)
-        data['test_score'] = test_results[i]
+        test_results[i] = test_results[i][:-1]
+        data['test_score'] = test_results[i].split('\t')
         obj.append(data)
         line = f.readline().decode()
 
