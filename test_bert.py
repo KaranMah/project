@@ -16,7 +16,7 @@ file_name = ""
 # get first item that isn't processed
 for file in allFiles:
     file = file.replace(".csv", "")
-    if not os.path.exists(f'data/results/{file}.json'):
+    if not os.path.exists(f'/data/results/{file}.json'):
         file_name = file + ".csv"
         break
 
@@ -31,26 +31,12 @@ dst_file = os.path.join(dst_dir, file_name)
 new_dst_file_name = os.path.join(dst_dir, "get_test.csv")
 os.rename(dst_file, new_dst_file_name)
 
-# #get data
-# print("reading file\n")
-# with open(csvPath + file_name, 'r') as f:
-#     raw_input = f.readlines()
-# print("file read\n")
-#
-#
-# # Convert data to input file
-# lst = [x.replace('\n', '') for x in raw_input]
-# df = pd.DataFrame(lst)
-# df.to_csv(BERT_DIR + '/data/get_test.csv', sep='\t', index=False, header=False)
-# print("input ready...running bert\n")
-# print(df.shape)
-
 
 # Run Command
 if os.path.exists(f'{BERT_DATA_DIR}/bert_result/test_results.tsv'):
     os.remove(f'{BERT_DATA_DIR}/bert_result/test_results.tsv')
 
-COMMAND = f'python3 {BERT_DIR}/test_bert/run_classifier.py \
+COMMAND = f'nohup python3 {BERT_DIR}/test_bert/run_classifier.py \
      --task_name=twitter \
      --do_predict=true \
      --data_dir={BERT_DIR}/data \
@@ -82,7 +68,7 @@ with open(jsonPath + "/" + json_file_name, 'rb') as f:
         line = f.readline().decode()
         i += 1
 
-print("saving results")
+print("saving results in .... " + json_file_name)
 # saving data
 resultsPath = "/data/results"
 
