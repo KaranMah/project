@@ -23,9 +23,8 @@ for file in allFiles:
 print(file_name)
 
 
-src_dir = os.curdir
 dst_dir = f'{BERT_DATA_DIR}'
-src_file = os.path.join(src_dir, file_name)
+src_file = csvPath + file_name
 shutil.copy(src_file, dst_dir)
 
 dst_file = os.path.join(dst_dir, file_name)
