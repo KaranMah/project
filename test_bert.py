@@ -53,7 +53,6 @@ COMMAND = f'python3 {BERT_DIR}/test_bert/run_classifier.py \
      --output_dir={BERT_DIR}/data/bert_result'
 os.system(COMMAND)
 
-
 with open(f'{BERT_DATA_DIR}/bert_result/test_results.tsv', 'r') as f:
     test_results = f.readlines()
 
