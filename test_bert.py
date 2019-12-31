@@ -16,12 +16,11 @@ file_name = ""
 # get first item that isn't processed
 for file in allFiles:
     file = file.replace(".csv","")
-    if not os.path.exists(f'data/results/{file}.json'):
+    if not os.path.exists(f'/data/results/{file}.json'):
         file_name = file + ".csv"
         break
 
 print(file_name)
-
 
 #get data
 print("reading file\n")
