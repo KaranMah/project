@@ -1,4 +1,5 @@
 import os
+import json
 from os import listdir
 from os.path import isfile, join
 import sys
@@ -14,6 +15,8 @@ allFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
 # get first item that isn't processed
 # next(x for x in allFiles if x)
 
+print(allFiles)
+print("\n")
 file_name = allFiles[0]
 print(file_name)
 
@@ -22,41 +25,57 @@ OUTPUT_DIR = f'{BERT_DATA_DIR}/outputs/{TASK_NAME}/'
 REPORTS_DIR = f'{BERT_DATA_DIR}/reports/{TASK_NAME}_evaluation_reports/'
 
 #get data
+print("reading file\n")
 with open(csvPath + file_name, 'r') as f:
     raw_input = f.readlines()
+print("file read\n")
+
 
 # Convert data to input file
 lst = [x.replace('\n', '') for x in raw_input]
-df = pd.DataFrae(lst)
-df.to_csv(BERT_DIR + 'data/get_test.tsv', sep='\t', index=False, header=True)
-
+df = pd.DataFrame(lst)
+df.to_csv(BERT_DIR + '/data/get_test.csv', sep='\t', index=False, header=False)
+print("input ready...running bert\n")
+print(df.shape)
 
 # Run Command
-os.system(f'cd {BERT_DIR}')
-COMMAND = f'python ./test_bert/run_classifier.py \
-     --task_name={TASK_NAME} \
+if os.path.exists(f'{BERT_DATA_DIR}/bert_result/test_results.tsv'):
+        os.remove(f'{BERT_DATA_DIR}/bert_result/test_results.tsv')
+
+COMMAND = f'python3 {BERT_DIR}/test_bert/run_classifier.py \
+     --task_name=twitter \
      --do_predict=true \
-     --data_dir=./data \
-     --vocab_file=./Bert_base_dir/vocab.txt\
-     --bert_config_file=./Bert_base_dir/bert_config.json\
-     --init_checkpoint=./model \
+     --data_dir={BERT_DIR}/data \
+     --vocab_file={BERT_DIR}/Bert_base_dir/vocab.txt\
+     --bert_config_file={BERT_DIR}/Bert_base_dir/bert_config.json\
+     --init_checkpoint={BERT_DIR}/model \
      --max_seq_length=64 \
-     --output_dir=./data/bert_result'
+     --output_dir={BERT_DIR}/data/bert_result'
 os.system(COMMAND)
-with open(f'{BERT_DATA_DIR}/bert_results/test_results.tsv'):
+
+
+with open(f'{BERT_DATA_DIR}/bert_result/test_results.tsv', 'r') as f:
     test_results = f.readlines()
 
+print("BERT successful\n")
 # Append data to input
-jsonPath = "/data/JSON"
-with open(jsonPath + file_name, 'r') as f:
+jsonPath = "/data/json"
+
+json_file_name = file_name.replace(".csv",".json")
+with open(jsonPath + "/" + json_file_name, 'r') as f:
     json_input = f.readlines()
 
 for i in range(len(json_input)):
-    json_input[i]["test_score"] = test_results[i]
+    inp = json.load(json_input[i])
+    inp['test_score'] = test_results[i]
+    json_input[i] = json.dump(inp)
 
+print("saving results")
 # saving data
 resultsPath = "/data/results"
-with open(resultsPath + file_name, 'w') as f:
+
+
+with open(resultsPath +"/"+ json_file_name, 'w') as f:
     for obj in json_input:
         f.write(obj)
 
