@@ -63,7 +63,7 @@ jsonPath = "/data/json"
 json_file_name = file_name.replace(".csv", ".json")
 
 obj = []
-i=0
+i = 0
 with open(jsonPath + "/" + json_file_name, 'rb') as f:
     line = f.readline().decode()
     while line:
@@ -72,6 +72,7 @@ with open(jsonPath + "/" + json_file_name, 'rb') as f:
         data['test_score'] = test_results[i].split('\t')
         obj.append(data)
         line = f.readline().decode()
+        i += 1
 
 print("saving results")
 # saving data
