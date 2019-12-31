@@ -76,7 +76,10 @@ print("saving results")
 # saving data
 resultsPath = "/data/results"
 
-with open(resultsPath +"/"+ json_file_name, 'w') as f:
+if os.path.exists(resultsPath +"/"+ json_file_name):
+        os.remove(resultsPath +"/"+ json_file_name)
+
+with open(resultsPath +"/"+ json_file_name, 'w+') as f:
     for item in obj:
         f.write(json.dumps(item))
         f.write("\n")
