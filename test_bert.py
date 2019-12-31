@@ -70,17 +70,11 @@ with open(jsonPath + "/" + json_file_name, 'rb') as f:
         data = ast.literal_eval(line)
         data['test_score'] = test_results[i]
         obj.append(data)
-
-
-# for i in range(len(json_input)):
-#     inp = json.load(json_input[i])
-#     inp['test_score'] = test_results[i]
-#     json_input[i] = json.dump(inp)
+        line = f.readline().decode()
 
 print("saving results")
 # saving data
 resultsPath = "/data/results"
-
 
 with open(resultsPath +"/"+ json_file_name, 'w') as f:
     for item in obj:
