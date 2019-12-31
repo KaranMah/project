@@ -24,7 +24,7 @@ print(file_name)
 
 
 src_dir = os.curdir
-dst_dir = BERT_DATA_DIR
+dst_dir = f'{BERT_DATA_DIR}'
 src_file = os.path.join(src_dir, file_name)
 shutil.copy(src_file, dst_dir)
 
