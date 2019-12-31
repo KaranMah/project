@@ -3,7 +3,7 @@ import json
 from os import listdir
 from os.path import isfile, join
 import ast
-import pandas as pd
+import shutil
 
 BERT_DIR = "/home/fyp19020/BERT-fine-tuning-for-twitter-sentiment-analysis"
 BERT_DATA_DIR = f'{BERT_DIR}/data'
@@ -15,31 +15,39 @@ allFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
 file_name = ""
 # get first item that isn't processed
 for file in allFiles:
-    file = file.replace(".csv","")
+    file = file.replace(".csv", "")
     if not os.path.exists(f'data/results/{file}.json'):
         file_name = file + ".csv"
         break
 
 print(file_name)
 
+src_dir = os.curdir
+dst_dir = BERT_DATA_DIR
+src_file = os.path.join(src_dir, file_name)
+shutil.copy(src_file, dst_dir)
 
-#get data
-print("reading file\n")
-with open(csvPath + file_name, 'r') as f:
-    raw_input = f.readlines()
-print("file read\n")
+dst_file = os.path.join(dst_dir, file_name)
+new_dst_file_name = os.path.join(dst_dir, "get_test.csv")
+os.rename(dst_file, new_dst_file_name)
 
-
-# Convert data to input file
-lst = [x.replace('\n', '') for x in raw_input]
-df = pd.DataFrame(lst)
-df.to_csv(BERT_DIR + '/data/get_test.csv', sep='\t', index=False, header=False)
-print("input ready...running bert\n")
-print(df.shape)
+# #get data
+# print("reading file\n")
+# with open(csvPath + file_name, 'r') as f:
+#     raw_input = f.readlines()
+# print("file read\n")
+#
+#
+# # Convert data to input file
+# lst = [x.replace('\n', '') for x in raw_input]
+# df = pd.DataFrame(lst)
+# df.to_csv(BERT_DIR + '/data/get_test.csv', sep='\t', index=False, header=False)
+# print("input ready...running bert\n")
+# print(df.shape)
 
 # Run Command
 if os.path.exists(f'{BERT_DATA_DIR}/bert_result/test_results.tsv'):
-        os.remove(f'{BERT_DATA_DIR}/bert_result/test_results.tsv')
+    os.remove(f'{BERT_DATA_DIR}/bert_result/test_results.tsv')
 
 COMMAND = f'python3 {BERT_DIR}/test_bert/run_classifier.py \
      --task_name=twitter \
@@ -77,10 +85,10 @@ print("saving results")
 # saving data
 resultsPath = "/data/results"
 
-if os.path.exists(resultsPath +"/"+ json_file_name):
-        os.remove(resultsPath +"/"+ json_file_name)
+if os.path.exists(resultsPath + "/" + json_file_name):
+    os.remove(resultsPath + "/" + json_file_name)
 
-with open(resultsPath +"/"+ json_file_name, 'w+') as f:
+with open(resultsPath + "/" + json_file_name, 'w+') as f:
     for item in obj:
         f.write(json.dumps(item))
         f.write("\n")
