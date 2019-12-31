@@ -22,6 +22,7 @@ for file in allFiles:
 
 print(file_name)
 
+
 src_dir = os.curdir
 dst_dir = BERT_DATA_DIR
 src_file = os.path.join(src_dir, file_name)
@@ -44,6 +45,7 @@ os.rename(dst_file, new_dst_file_name)
 # df.to_csv(BERT_DIR + '/data/get_test.csv', sep='\t', index=False, header=False)
 # print("input ready...running bert\n")
 # print(df.shape)
+
 
 # Run Command
 if os.path.exists(f'{BERT_DATA_DIR}/bert_result/test_results.tsv'):
