@@ -12,17 +12,16 @@ BERT_MODEL = "MODEL NAME"
 csvPath = '/data/csv/'
 allFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
 
+file_name = ""
 # get first item that isn't processed
-# next(x for x in allFiles if x)
+for file in allFiles:
+    file = file.replace(".csv","")
+    if not os.path.exists(f'data/results/{file}.json'):
+        file_name = file + ".csv"
+        break
 
-print(allFiles)
-print("\n")
-file_name = allFiles[0]
 print(file_name)
 
-TASK_NAME = file_name
-OUTPUT_DIR = f'{BERT_DATA_DIR}/outputs/{TASK_NAME}/'
-REPORTS_DIR = f'{BERT_DATA_DIR}/reports/{TASK_NAME}_evaluation_reports/'
 
 #get data
 print("reading file\n")
