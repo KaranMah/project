@@ -18,7 +18,8 @@ while(True):
     q = queries[0].strip('\n')
     queries = queries[1:]
     print("Checking query "+q)
-    if(q[0] in ['*', '&']):
+    nohup_files = os.listdir("TweetScraper-master/Data/log/")
+    if(q[0] in ['*', '&'] or q[3:].split(' ')[0] in ' '.join(nohup_files)):
         queries.append(q+'\n')
         continue
     else:

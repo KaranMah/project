@@ -36,7 +36,7 @@ for query in queries:
         new_queries.append(new_q)
 
 
-with open(file_name[:-4]+'_v3.txt', 'w') as f:
+with open(file_name, 'w') as f:
     for query in new_queries:
         f.write(query)
         f.write('\n')
