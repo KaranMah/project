@@ -33,7 +33,7 @@ for file_name in files_array:
             (from_date, to_date) = (data_filename.split('_')[2], data_filename.split('_')[4])
         except:
             continue
-        date_data = os.popen('tail '+source+'/'+data_filename+' -c 200')
+        date_data = os.popen('tail '+source+'/'+data_filename+' -c 150')
         new_from = re.search("[0-9]{4}-[0-9]{2}-[0-9]{2}", date_data.read()).group()
         print("Data for "+file_name[5:-4]+" to be scraped from "+from_date+" to "+to_date+" has scraped from "+new_from+" until "+to_date+"...")
         r = re.compile('\*.#'+file_name[5:-4]+' since:'+from_date+' until:'+to_date)
