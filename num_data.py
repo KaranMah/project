@@ -43,7 +43,7 @@ def get_index_rates(data):
                                         country=row.Country,
                                         from_date=config['earliest_date'],
                                         to_date=config['latest_date'])
-            final_df = final_df.append(df)
+            final_df = final_df.append(df.assign(Idx=idx))
     final_df.to_csv("historical_index.csv")
 
 # if __name__ == '__main__':
