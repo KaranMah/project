@@ -8,7 +8,7 @@ config = {
     "raw_data": "./currencies.txt",
     "cur_pairs": "./cur_pairs.txt",
     "earliest_date" : '01/01/2010',
-    "latest_date": datetime.datetime.now().strftime("%d/%m/%Y")
+    "latest_date": '31/12/2019'
 }
 
 def read_file(filename):
