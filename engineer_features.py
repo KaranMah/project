@@ -10,7 +10,9 @@ allFiles = [f for f in listdir(RESULTS_PATH) if isfile(join(RESULTS_PATH, f))]
 
 json_file_name = allFiles[0]
 
+data = []
 with open(RESULTS_PATH + "/" + json_file_name, 'r') as f:
-    test_results = json.load(f)
+    for line in f:
+        data.append(json.loads(line))
 
-print(test_results)
+print(data)
