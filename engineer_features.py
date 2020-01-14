@@ -11,8 +11,15 @@ allFiles = [f for f in listdir(RESULTS_PATH) if isfile(join(RESULTS_PATH, f))]
 json_file_name = allFiles[0]
 
 data = []
+timestamp = 'timestamp'
+dailyAverage = {}
 with open(RESULTS_PATH + "/" + json_file_name, 'r') as f:
     for line in f:
-        data.append(json.loads(line))
+        obj = json.loads(line)
+        if dailyAverage[obj[timestamp]]:
+            dailyAverage[f'{obj[timestamp]}'].append(obj['test_score'][0])
+        else:
+            dailyAverage[f'{obj[timestamp]}'] = [obj['test_score'][0]]
+print(dailyAverage)
 
-print(data)
+
