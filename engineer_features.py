@@ -16,10 +16,13 @@ dailyAverage = {}
 with open(RESULTS_PATH + "/" + json_file_name, 'r') as f:
     for line in f:
         obj = json.loads(line)
-        if dailyAverage[obj[timestamp]]:
-            dailyAverage[f'{obj[timestamp]}'].append(obj['test_score'][0])
+        if obj[timestamp] in dailyAverage:
+            dailyAverage[f'{obj[timestamp]}'].append(float(obj['test_score'][0]))
         else:
-            dailyAverage[f'{obj[timestamp]}'] = [obj['test_score'][0]]
+            dailyAverage[f'{obj[timestamp]}'] = [float(obj['test_score'][0])]
+
+for key in dailyAverage:
+    dailyAverage[key] = sum(dailyAverage[key])/len(dailyAverage[key])
 print(dailyAverage)
 
 
