@@ -5,7 +5,6 @@
 &$#Tokyo since:2010-01-01 until:2015-01-12
 &!#Wellington since:2010-01-02 until:2018-11-11
 &$#India since:2019-10-20 until:2019-10-28
-*$#Japan since:2010-01-01 until:2018-09-05
 &$#Japan since:2018-09-06 until:2018-09-23
 &$#Japan since:2018-09-24 until:2018-11-16
 *$#Thailand since:2010-01-01 until:2017-01-27
@@ -51,7 +50,6 @@
 &!#Manila since:2010-01-01 until:2019-10-26
 &!#Manila since:2019-10-27 until:2019-12-31
 &!#RRD_Davao since:2016-06-30 until:2019-12-31
-*!#Singapore since:2010-01-01 until:2019-04-19
 &!#Singapore since:2019-04-20 until:2019-12-31
 &!#ImranKhanPTI since:2018-08-18 until:2019-12-31
 &$#RajaPervaizAshraf since:2012-06-22 until:2013-03-24
@@ -185,3 +183,6 @@
 &$#India since:2018-09-30 until:2019-01-03
 ?$#NewYork since:2010-01-01 until:2016-10-27
 &$#NewYork since:2016-10-28 until:2019-06-28
+?$#Japan since:2010-01-01 until:2017-12-07
+&$#Japan since:2017-12-08 until:2018-09-05
+&!#Singapore since:2010-01-01 until:2019-04-19
