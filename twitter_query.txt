@@ -1,3 +1,4 @@
+&$#NewYork since:2016-06-25 until:2016-10-27
 &$#HonTonyAbbott since:2015-05-03 until:2015-09-15
 &$#HonTonyAbbott since:2013-09-18 until:2015-05-02
 &$#TurnbullMalcolm since:2015-09-15 until:2018-08-24
@@ -67,16 +68,12 @@
 &$#Australia since:2017-01-13 until:2019-04-10
 &$#Jakarta since:2013-06-07 until:2017-07-10
 &$#Jakarta since:2012-11-25 until:2013-06-06
-*$#India since:2010-01-01 until:2018-09-29
 &$#India since:2018-09-30 until:2019-01-03
-*$#NewYork since:2010-01-01 until:2016-10-27
 &$#NewYork since:2016-10-28 until:2019-06-28
-*$#Japan since:2010-01-01 until:2017-12-07
 &$#Japan since:2017-12-08 until:2018-09-05
 &!#Singapore since:2010-01-01 until:2019-04-19
 &$#Thailand since:2010-01-01 until:2017-01-27
 &$#India since:2019-01-04 untik:2019-10-19
-*$#HongKong since:2010-01-01 until:2014-10-06
 &$#HongKong since:2014-10-07 until:2015-07-04
 &$#HongKong since:2015-07-05 until:2019-09-04
 &$#Tokyo since:2010-01-01 until:2015-01-12
@@ -186,3 +183,9 @@
 &$#MrKRudd since:2010-01-01 until:2010-06-24
 &$#JuliaGillard since:2010-06-24 until:2013-06-27
 &$#MrKRudd since:2013-06-27 until:2013-09-18
+*$#Japan since:2010-01-01 until:2017-10-23
+&$#Japan since:2017-10-24 until:2017-12-07
+*$#NewYork since:2010-01-01 until:2016-06-24
+&$#HongKong since:2010-01-01 until:2014-10-06
+?$#India since:2010-01-01 until:2017-11-17
+&$#India since:2017-11-18 until:2018-09-29

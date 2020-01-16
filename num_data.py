@@ -7,7 +7,7 @@ import datetime as datetime
 config = {
     "raw_data": "./currencies.txt",
     "cur_pairs": "./cur_pairs.txt",
-    "earliest_date" : '23/12/2009',#Actual date is 01/01/2010. Need older dates for interpolation.
+    "earliest_date" : '06/01/2009',#Actual date is 01/01/2010. Need older dates for interpolation.
     "latest_date": '31/12/2019'
 }
 
