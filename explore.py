@@ -12,38 +12,98 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error,r2_score
 from sklearn.ensemble import RandomForestRegressor
 
-def read_forex(filename="historical_forex.csv"):
-    df = pd.read_csv(filename, parse_dates=["Date"])
-    return df
+def interpolate_data(save=False):
+    forex = pd.read_csv("historical_forex.csv", parse_dates=["Date"])
+    pivoted_forex = pd.pivot_table(forex, index=["Date"], columns=["Currency"], values=["Open", "High", "Low", "Close"])
+    first_date = min(pivoted_forex.index)
+    last_date = max(pivoted_forex.index)
+    temp_dates = list(filter(lambda x: x.weekday() not in [5,6], pd.date_range(first_date, last_date)))
+    pivoted_forex = pivoted_forex.reindex(temp_dates)
+    for i in range(len(pivoted_forex.columns)):
+        pivoted_forex.iloc[:,i] = pivoted_forex.iloc[:,i].interpolate(method="time")
+    if(save):
+        pivoted_forex.to_csv('interpolated_historical_forex.csv')
 
-def read_index(filename="historical_index.csv"):
-    df = pd.read_csv(filename, parse_dates=["Date"])
-    return df
+    index = pd.read_csv("historical_index.csv", parse_dates=["Date"])
+    pivoted_index = pd.pivot_table(index, index=["Date"], columns=["Currency", "Idx"], values=["Open", "High", "Low", "Close", "Volume"])
+    first_date = min(pivoted_index.index)
+    last_date = max(pivoted_index.index)
+    temp_dates = list(filter(lambda x: x.weekday() not in [5,6], pd.date_range(first_date, last_date)))
+    pivoted_index = pivoted_index.reindex(temp_dates)
+    for i in range(len(pivoted_index.columns)):
+        pivoted_index.iloc[:,i] = pivoted_index.iloc[:,i].interpolate(method="time")
+    if(save):
+        pivoted_index.to_csv('interpolated_historical_index.csv')
 
-forex = read_forex()
-index = read_index()
+    return (pivoted_forex, pivoted_index)
 
-us_dates = index[(index['Currency']=="USD") & (index['Idx']=="Nasdaq 100")]['Date']
+def oc_return(data, index = True):
+    intraday = ((data['Close']-data['Open'])/data['Open'])
+    if(index):
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday',)+x for x in intraday.columns])
+    else:
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday',x) for x in intraday.columns])
+    concat_data = data.join(intraday)
+    return(concat_data)
 
-pivoted_forex = pd.pivot_table(forex[forex['Date'].isin(us_dates)], index=["Date"], columns=["Currency"], values=["Open", "High", "Low", "Close"])
-open_forex = pd.pivot_table(forex[forex['Date'].isin(us_dates)], index=["Date"], columns=["Currency"], values=["Open"])
-close_forex = pd.pivot_table(forex[forex['Date'].isin(us_dates)], index=["Date"], columns=["Currency"], values=["Close"])
+def get_returns(data, index=True):
+    concat_data = data
+    raws = ['Open', 'High', 'Low', 'Close', 'Volume']
+    for met in raws:
+        try:
+            temp = data[met].pct_change(1)
+        except:
+            continue
+        if(index):
+            temp.columns = pd.MultiIndex.from_tuples([(met+'_Ret',)+x for x in temp.columns])
+        else:
+            temp.columns = pd.MultiIndex.from_tuples([(met+'_Ret',x) for x in temp.columns])
+        concat_data = concat_data.join(temp)
+    return(concat_data)
 
-pivoted_index = pd.pivot_table(index[index['Date'].isin(us_dates)], index=["Date"], columns=["Currency", "Idx"], values=["Open", "High", "Low", "Close"])
-open_index = pd.pivot_table(index[index['Date'].isin(us_dates)], index=["Date"], columns=["Currency", "Idx"], values=["Open"])
-close_index = pd.pivot_table(index[index['Date'].isin(us_dates)], index=["Date"], columns=["Currency", "Idx"], values=["Close"])
+def add_features(forex= None, index= None, save=False):
+    forex = (pd.read_csv("interpolated_historical_forex.csv", header=[0,1], index_col=0)) if forex is None else forex
+    transf_forex = oc_return(forex, False)
+    transf_forex = get_returns(transf_forex, False)
+    if(save):
+        transf_forex.to_csv('extra_features_forex.csv')
 
-open_forex.columns = map(lambda x: x[1], open_forex.columns)
-open_forex = open_forex.drop('IDR', axis=1)
+    index = pd.read_csv("interpolated_historical_index.csv", header=[0,1,2], index_col=0) if index is None else index
+    transf_index = oc_return(index, True)
+    transf_index = get_returns(transf_index, True)
+    if(save):
+        transf_index.to_csv('extra_features_index.csv')
 
-open_forex.isnull().values
-open_forex[open_forex.isna().any(axis=1)]
-len(open_forex)
-open_forex.count()
+    return(transf_forex, transf_index)
 
-open_index.count()
+def transform(data, start_date = '01-01-2010', end_date = '12-31-2019'):
+    dates = list(filter(lambda x: x.weekday() not in [5,6], pd.date_range(start_date, end_date)))
+    return(data[data.index.isin(dates)])
 
-plt.plot(open_forex.iloc[:,4])
+
+print("Interpolating forex and index rates...")
+try:
+    interpolated_forex, interpolated_index = interpolate_data(True)
+    print("Done interpolating...")
+except:
+    print("Some error happened in interpolation...")
+print("Adding extra features...")
+try:
+    updated_forex, updated_index = add_features(interpolated_forex, interpolated_index)
+    print("Done updating features...")
+except:
+    print("Some error in adding features...")
+print("Transforming dates...")
+try:
+    prep_forex = transform(updated_forex)
+    prep_index = transform(updated_index)
+    print("Done transforming for dates...")
+except:
+    print("Some error in transforming dates...")
+
+
+###############################################################################
+###############################################################################
 
 ax = sns.heatmap(
     open_forex.corr(),
