@@ -1,3 +1,7 @@
+&$#India since:2015-09-10 until:2015-12-02
+&$#NewYork since:2012-11-08 until:2015-02-02
+&$#NewYork since:2015-02-03 until:2016-06-24
+&$#India since:2017-11-18 until:2018-09-29
 &$#NewYork since:2016-06-25 until:2016-10-27
 &$#HonTonyAbbott since:2015-05-03 until:2015-09-15
 &$#HonTonyAbbott since:2013-09-18 until:2015-05-02
@@ -183,9 +187,11 @@
 &$#MrKRudd since:2010-01-01 until:2010-06-24
 &$#JuliaGillard since:2010-06-24 until:2013-06-27
 &$#MrKRudd since:2013-06-27 until:2013-09-18
-*$#Japan since:2010-01-01 until:2017-10-23
 &$#Japan since:2017-10-24 until:2017-12-07
-*$#NewYork since:2010-01-01 until:2016-06-24
 &$#HongKong since:2010-01-01 until:2014-10-06
-?$#India since:2010-01-01 until:2017-11-17
-&$#India since:2017-11-18 until:2018-09-29
+&$#Japan since:2017-01-27 until:2017-10-23
+&$#India since:2015-12-03 until:2017-11-17
+*$#Japan since:2010-01-01 until:2015-03-23
+&$#Japan since:2015-03-24 until:2017-01-26
+*$#NewYork since:2010-01-01 until:2012-11-07
+*$#India since:2010-01-01 until:2015-09-09
