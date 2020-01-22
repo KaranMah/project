@@ -1,10 +1,26 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.ensemble import RandomForestRegressor
+
+###############################################################################
+###############################################################################
+
+forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
+index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
 
 ###############################################################################
 ###############################################################################
 
 ax = sns.heatmap(
-    open_forex.corr(),
+    forex['Open'].corr(),
     vmin=-1, vmax=1, center=0,
     cmap=sns.diverging_palette(20, 220, n=200),
     square=True)
@@ -12,6 +28,35 @@ ax = sns.heatmap(
 
 ###############################################################################
 ###############################################################################
+
+def stationarity(forex, index, save=False):
+    col_names = forex.columns
+    forex_res = pd.DataFrame(index=pd.MultiIndex.from_tuples(col_names), columns=['ADF Statistic', 'P - Value', 'Lag'])
+    for col, vals in forex.items():
+        try:
+            adf_res = adfuller(vals)
+        except:
+            adf_res = [np.nan, np.nan, np.nan]
+        forex_res.loc[col, 'ADF Statistic'] = adf_res[0]
+        forex_res.loc[col, 'P - Value'] = adf_res[1]
+        forex_res.loc[col, 'Lag'] = adf_res[2]
+
+    col_names = index.columns
+    index_res = pd.DataFrame(index=pd.MultiIndex.from_tuples(col_names), columns=['ADF Statistic', 'P - Value', 'Lag'])
+    for col, vals in index.items():
+        try:
+            adf_res = adfuller(vals)
+        except:
+            adf_res = [np.nan, np.nan, np.nan]
+        index_res.loc[col, 'ADF Statistic'] = adf_res[0]
+        index_res.loc[col, 'P - Value'] = adf_res[1]
+        index_res.loc[col, 'Lag'] = adf_res[2]
+
+    if(save):
+        forex_res.to_csv('forex_stationarity.csv')
+        index_res.to_csv('index_stationarity.csv')
+
+stationarity(forex, index, True)
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.Series(y_pred)], axis=1, ignore_index=True)
@@ -47,10 +92,6 @@ def do_stuff_forex(raw_data, cur, periods, model):
     plt.plot(data['ret'])
     plot_acf(data['ret'])
     plot_pacf(data['ret'])
-    adf_res = adfuller(data['ret'])
-    print("ADF statistic: ", adf_res[0])
-    print("P - Value: ", adf_res[1])
-    print("Lag: ", adf_res[2])
     features = list(map(lambda x: "ret_"+str(x), periods))
     X_train, X_test, y_train, y_test = train_test_split(data[features], data['ret'], test_size=0.33)
     run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, 'ret')

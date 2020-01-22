@@ -1,16 +1,7 @@
 import json
-import pprint
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
-from statsmodels.tsa.stattools import adfuller
-from statsmodels.tsa.statespace.sarimax import SARIMAX
-from sklearn import linear_model
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error,r2_score
-from sklearn.ensemble import RandomForestRegressor
+
 
 def interpolate_data(save=False):
     forex = pd.read_csv("historical_forex.csv", parse_dates=["Date"])
