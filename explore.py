@@ -40,10 +40,28 @@ def interpolate_data(save=False):
 def oc_return(data, index = True):
     intraday = ((data['Close']-data['Open'])/data['Open'])
     if(index):
-        intraday.columns = pd.MultiIndex.from_tuples([('Intraday',)+x for x in intraday.columns])
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday_OC',)+x for x in intraday.columns])
     else:
-        intraday.columns = pd.MultiIndex.from_tuples([('Intraday',x) for x in intraday.columns])
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday_OC',x) for x in intraday.columns])
     concat_data = data.join(intraday)
+    return(concat_data)
+
+def hl_return(data, index = True):
+    intraday = ((data['High']-data['Low'])/data['Low'])
+    if(index):
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday_HL',)+x for x in intraday.columns])
+    else:
+        intraday.columns = pd.MultiIndex.from_tuples([('Intraday_HL',x) for x in intraday.columns])
+    concat_data = data.join(intraday)
+    return(concat_data)
+
+def prev_close_open_return(data, index = True):
+    close_open = ((data['Open']-(data['Close'].shift(1)))/(data['Close'].shift(1)))
+    if(index):
+        close_open.columns = pd.MultiIndex.from_tuples([('Prev_close_open',)+x for x in close_open.columns])
+    else:
+        close_open.columns = pd.MultiIndex.from_tuples([('Prev_close_open',x) for x in close_open.columns])
+    concat_data = data.join(close_open)
     return(concat_data)
 
 def get_returns(data, index=True):
@@ -61,16 +79,67 @@ def get_returns(data, index=True):
         concat_data = concat_data.join(temp)
     return(concat_data)
 
+def get_period_to_date(data, index=True):
+    if(index):
+        concat_data = data
+        concat_mtd = data.groupby([data.index.year, data.index.month]).transform('first')
+        temp_mtd = data[['Open', 'High', 'Low', 'Close', 'Volume']].divide(concat_mtd[['Open', 'High', 'Low', 'Close', 'Volume']]) - 1
+        col_names = (list(set([x + '_MTD' for x in temp_mtd.columns.get_level_values(0)])))
+        temp_mtd.columns = pd.MultiIndex.from_tuples([(x[0] + '_MTD',)+x[1:] for x in temp_mtd.columns])
+        concat_data = concat_data.join(temp_mtd)
+
+        concat_ytd = data.groupby([data.index.year]).transform('first')
+        temp_ytd = data[['Open', 'High', 'Low', 'Close', 'Volume']].divide(concat_ytd[['Open', 'High', 'Low', 'Close', 'Volume']]) - 1
+        col_names = (list(set([x + '_MTD' for x in temp_ytd.columns.get_level_values(0)])))
+        temp_ytd.columns = pd.MultiIndex.from_tuples([(x[0] + '_YTD',)+x[1:] for x in temp_ytd.columns])
+        concat_data = concat_data.join(temp_ytd)
+    else:
+        concat_data = data
+        concat_mtd = data.groupby([data.index.year, data.index.month]).transform('first')
+        temp_mtd = data[['Open', 'High', 'Low', 'Close']].divide(concat_mtd[['Open', 'High', 'Low', 'Close']]) - 1
+        col_names = (list(set([x + '_MTD' for x in temp_mtd.columns.get_level_values(0)])))
+        temp_mtd.columns = pd.MultiIndex.from_tuples([(x[0] + '_MTD',)+x[1:] for x in temp_mtd.columns])
+        concat_data = concat_data.join(temp_mtd)
+
+        concat_ytd = data.groupby([data.index.year]).transform('first')
+        temp_ytd = data[['Open', 'High', 'Low', 'Close']].divide(concat_ytd[['Open', 'High', 'Low', 'Close']]) - 1
+        col_names = (list(set([x + '_MTD' for x in temp_ytd.columns.get_level_values(0)])))
+        temp_ytd.columns = pd.MultiIndex.from_tuples([(x[0] + '_YTD',)+x[1:] for x in temp_ytd.columns])
+        concat_data = concat_data.join(temp_ytd)
+    return(concat_data)
+
+
+def add_date_values(data, index=True):
+    concat_data = data
+    temp = {'Weekday': concat_data.index.weekday, 'Year': concat_data.index.year,
+            'Month': concat_data.index.month, 'Day': concat_data.index.day}
+    temp = pd.DataFrame(temp, index=concat_data.index)
+    if(index):
+        print(temp.columns)
+        temp.columns = pd.MultiIndex.from_tuples([('Time features',x,x) for x in temp.columns])
+    else:
+        temp.columns = pd.MultiIndex.from_tuples([('Time features',x) for x in temp.columns])
+    concat_data = concat_data.join(temp)
+    return(concat_data)
+
 def add_features(forex= None, index= None, save=False):
     forex = (pd.read_csv("interpolated_historical_forex.csv", header=[0,1], index_col=0)) if forex is None else forex
     transf_forex = oc_return(forex, False)
+    transf_forex = hl_return(transf_forex, False)
+    transf_forex = prev_close_open_return(transf_forex, False)
     transf_forex = get_returns(transf_forex, False)
+    transf_forex = add_date_values(transf_forex, False)
+    transf_forex = get_period_to_date(transf_forex, False)
     if(save):
         transf_forex.to_csv('extra_features_forex.csv')
 
     index = pd.read_csv("interpolated_historical_index.csv", header=[0,1,2], index_col=0) if index is None else index
     transf_index = oc_return(index, True)
+    transf_index = hl_return(transf_index, True)
+    transf_index = prev_close_open_return(transf_index, True)
     transf_index = get_returns(transf_index, True)
+    transf_index = add_date_values(transf_index, True)
+    transf_index = get_period_to_date(transf_index, False)
     if(save):
         transf_index.to_csv('extra_features_index.csv')
 
@@ -83,13 +152,13 @@ def transform(data, start_date = '01-01-2010', end_date = '12-31-2019'):
 
 print("Interpolating forex and index rates...")
 try:
-    interpolated_forex, interpolated_index = interpolate_data(True)
+    interpolated_forex, interpolated_index = interpolate_data()
     print("Done interpolating...")
 except:
     print("Some error happened in interpolation...")
 print("Adding extra features...")
 try:
-    updated_forex, updated_index = add_features(interpolated_forex, interpolated_index)
+    updated_forex, updated_index = add_features(interpolated_forex, interpolated_index, True)
     print("Done updating features...")
 except:
     print("Some error in adding features...")
@@ -110,6 +179,10 @@ ax = sns.heatmap(
     vmin=-1, vmax=1, center=0,
     cmap=sns.diverging_palette(20, 220, n=200),
     square=True)
+
+
+###############################################################################
+###############################################################################
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.Series(y_pred)], axis=1, ignore_index=True)
