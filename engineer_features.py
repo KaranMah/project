@@ -11,28 +11,27 @@ def get_daily_values(data, daily_scores):
         daily_scores[counter].update({'Average': np.average(data[key])})
         daily_scores[counter].update({'Max': max(data[key])})
         daily_scores[counter].update({'Min': min(data[key])})
-        daily_scores[counter].update({'Standard Deviation': np.std(data[key])[0]})
-        daily_scores[counter].update({'Variance': np.var(data[key])[0]})
-        daily_scores[counter].update({'Positive Multiplied': np.product(data[key])[0]})
+        daily_scores[counter].update({'Standard Deviation': np.std(data[key])})
+        daily_scores[counter].update({'Variance': np.var(data[key])})
+        daily_scores[counter].update({'Positive Multiplied': np.product(data[key])})
         daily_scores[counter].update(({'Count': str(len(data[key]))}))
         counter += 1
 
 
 def get_results(tag):
     file_list_with_same_tag = [f for f in allFiles if tag in f]
-    ctr = 0
     daily_scores = []
     test_scores = {}
     for file in file_list_with_same_tag:
         with open(RESULTS_PATH + "/" + file, 'r') as f:
             for line in f:
+                print(line)
                 obj = json.loads(line)
                 if obj[timestamp] in test_scores:
                     test_scores[f'{obj[timestamp]}'].append(float(obj['test_score'][0]))
                 else:
                     test_scores[f'{obj[timestamp]}'] = [float(obj['test_score'][0])]
-                    daily_scores[ctr] = {'Date': f'{obj[timestamp]}'}
-                    ctr += 1
+                    daily_scores.append({'Date': f'{obj[timestamp]}'})
     get_daily_values(test_scores, daily_scores)
     return daily_scores
 
@@ -67,8 +66,7 @@ for file_name in allFiles:
     if newTag not in hashtags:
         hashtags.append(newTag)
         scores = get_results(newTag)
-        save_results(newTag, scores)
-    break
+        save_results(newTag)
 
 
 
