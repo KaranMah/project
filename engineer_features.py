@@ -24,7 +24,7 @@ def aggregate_weekends(daily_scores):
     j = 0
     final_values = []
     while i < len(daily_scores):
-        day = dt.strptime(daily_scores[i]["Date"], '%d-%m-%Y').weekday()
+        day = daily_scores[i]["Date"].weekday()
         if day == 4:
             weekend_values = daily_scores[i:i+3]
             final_values.append({'Date': daily_scores[i]["Date"]})
