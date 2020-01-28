@@ -212,3 +212,4 @@ class SaveToFilePipeline(object):
         '''
         with open(fname,'a+', encoding='utf-8') as f:
             json.dump(dict(item), f, ensure_ascii=False)
+            f.write('\n')

@@ -1,7 +1,3 @@
-japan
-tokyo
-malaysia
-kualalumpur
 mongolia
 ulaanbaatar
 newzealand
@@ -34,3 +30,7 @@ dhaka
 mumbai
 indonesia
 jakarta
+japan
+tokyo
+malaysia
+kualalumpur
