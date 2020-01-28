@@ -24,9 +24,7 @@ def aggregate_weekends(daily_scores):
     j = 0
     final_values = []
     while i < len(daily_scores):
-        print(daily_scores[i])
         day = dt.strptime(daily_scores[i]["Date"], '%d-%m-%Y').weekday()
-        #day = daily_scores[i]["Date"].weekday()
         if day == 4:
             weekend_values = daily_scores[i:i+3]
             final_values.append({'Date': daily_scores[i]["Date"]})
@@ -58,7 +56,12 @@ def get_results(tag):
                     test_scores[f'{obj[timestamp]}'].append(float(obj['test_score'][0]))
                 else:
                     test_scores[f'{obj[timestamp]}'] = [float(obj['test_score'][0])]
-                    daily_scores.append({'Date': f'{obj[timestamp]}'})
+                    if timestamp == "timestamp":
+                        daily_scores.append({'Date': dt.strptime(obj[timestamp], '%d-%m-%Y')})
+                    else:
+                        date = obj[timestamp].split(' ')[0]
+                        daily_scores.append({'Date': dt.strptime(date, '%Y-%m-%d')})
+
     get_daily_values(test_scores, daily_scores)
     final_values = aggregate_weekends(daily_scores)
     return final_values
@@ -78,7 +81,6 @@ def save_results(tag):
 
 
 RESULTS_PATH = "/data/results"
-timestamp = 'timestamp'
 hashtags = []
 
 
@@ -88,8 +90,10 @@ for file_name in allFiles:
     name = file_name.split('_')
     if name[0] == "r":
         newTag = name[1]
+        timestamp = 'timestamp'
     else:
         newTag = name[0]
+        timestamp = 'datetime'
 
     if newTag not in hashtags:
         hashtags.append(newTag)
