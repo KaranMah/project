@@ -3,6 +3,7 @@ from os import listdir, makedirs
 from os.path import isfile, join, exists
 import numpy as np
 import csv
+import datetime as dt
 
 
 def get_daily_values(data, daily_scores):
@@ -18,22 +19,46 @@ def get_daily_values(data, daily_scores):
         counter += 1
 
 
+def aggregate_weekends(daily_scores):
+    i = 0
+    final_values = []
+    while i < len(daily_scores):
+        day = dt.weekday(daily_scores[i]["Date"])
+        if day == 4:
+            weekend_values = daily_scores[i:i+3]
+            final_values[i].update(({'Date': daily_scores[i]["Date"]}))
+            final_values[i].update({'Average': np.average([d['Average'] for d in weekend_values])})
+            final_values[i].update({'Max': max([d['Max'] for d in weekend_values])})
+            final_values[i].update({'Min': min([d['Min'] for d in weekend_values])})
+            final_values[i].update({'Standard Deviation': np.std([d['Standard Deviation'] for d in weekend_values])})
+            final_values[i].update({'Variance': np.var([d['Variance'] for d in weekend_values])})
+            final_values[i].update({'Count': sum([d['Count'] for d in weekend_values])})
+        elif day == 5 or day == 6:
+            continue
+        else:
+            final_values[i] = daily_scores[i]
+        i += 1
+    return final_values
+
+
 def get_results(tag):
     file_list_with_same_tag = [f for f in allFiles if tag in f]
+    ctr = 0
     daily_scores = []
     test_scores = {}
     for file in file_list_with_same_tag:
         with open(RESULTS_PATH + "/" + file, 'r') as f:
             for line in f:
-                print(line)
                 obj = json.loads(line)
                 if obj[timestamp] in test_scores:
                     test_scores[f'{obj[timestamp]}'].append(float(obj['test_score'][0]))
                 else:
                     test_scores[f'{obj[timestamp]}'] = [float(obj['test_score'][0])]
-                    daily_scores.append({'Date': f'{obj[timestamp]}'})
+                    daily_scores[ctr] = {'Date': f'{obj[timestamp]}'}
+                    ctr += 1
     get_daily_values(test_scores, daily_scores)
-    return daily_scores
+    final_values = aggregate_weekends(daily_scores)
+    return final_values
 
 
 def save_results(tag):
@@ -66,7 +91,7 @@ for file_name in allFiles:
     if newTag not in hashtags:
         hashtags.append(newTag)
         scores = get_results(newTag)
-        save_results(newTag)
+        save_results(newTag, scores)
 
 
 
