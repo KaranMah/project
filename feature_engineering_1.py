@@ -70,6 +70,22 @@ def get_returns(data, index=True):
         concat_data = concat_data.join(temp)
     return(concat_data)
 
+def moving_average(data, index=True):
+    concat_data = data
+    raws = ['Open_Ret', 'High_Ret', 'Low_Ret', 'Close_Ret', 'Volume_Ret']
+    for met in raws:
+        for t in [3,15,45]:
+            try:
+                temp = data[met].rolling(t).mean()
+            except:
+                continue
+            if(index):
+                temp.columns = pd.MultiIndex.from_tuples([(met+'_MA_'+str(t),)+x for x in temp.columns])
+            else:
+                temp.columns = pd.MultiIndex.from_tuples([(met+'_MA_'+str(t),x) for x in temp.columns])
+            concat_data = concat_data.join(temp)
+    return(concat_data)
+
 def get_period_to_date(data, index=True):
     if(index):
         concat_data = data
@@ -119,6 +135,7 @@ def add_features(forex= None, index= None, save=False):
     transf_forex = hl_return(transf_forex, False)
     transf_forex = prev_close_open_return(transf_forex, False)
     transf_forex = get_returns(transf_forex, False)
+    transf_forex = moving_average(transf_forex, False)
     transf_forex = add_date_values(transf_forex, False)
     transf_forex = get_period_to_date(transf_forex, False)
     if(save):
@@ -129,6 +146,7 @@ def add_features(forex= None, index= None, save=False):
     transf_index = hl_return(transf_index, True)
     transf_index = prev_close_open_return(transf_index, True)
     transf_index = get_returns(transf_index, True)
+    transf_index = moving_average(transf_index, True)
     transf_index = add_date_values(transf_index, True)
     transf_index = get_period_to_date(transf_index, False)
     if(save):

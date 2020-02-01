@@ -1,8 +1,10 @@
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
@@ -20,7 +22,7 @@ index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 ###############################################################################
 
 ax = sns.heatmap(
-    forex['Open'].corr(),
+    forex['Close'].corr(),
     vmin=-1, vmax=1, center=0,
     cmap=sns.diverging_palette(20, 220, n=200),
     square=True)
@@ -56,7 +58,16 @@ def stationarity(forex, index, save=False):
         forex_res.to_csv('forex_stationarity.csv')
         index_res.to_csv('index_stationarity.csv')
 
-stationarity(forex, index, True)
+# stationarity(forex, index, True)
+
+def seasonal_decomposition(data, cur, met = ['Close_Ret']):
+    col = tuple(met+cur)
+    to_do = data.loc[:,col]
+    result = seasonal_decompose(to_do, freq=250)
+    result.plot()
+
+seasonal_decomposition(forex, ['HKD'])
+
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.Series(y_pred)], axis=1, ignore_index=True)
