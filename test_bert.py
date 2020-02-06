@@ -36,7 +36,7 @@ os.rename(dst_file, new_dst_file_name)
 if os.path.exists(f'{BERT_DATA_DIR}/bert_result/test_results.tsv'):
     os.remove(f'{BERT_DATA_DIR}/bert_result/test_results.tsv')
 
-COMMAND = f'nohup python3 {BERT_DIR}/test_bert/run_classifier.py \
+COMMAND = f'python3 {BERT_DIR}/test_bert/run_classifier.py \
      --task_name=twitter \
      --do_predict=true \
      --data_dir={BERT_DIR}/data \
