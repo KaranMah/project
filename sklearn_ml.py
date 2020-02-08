@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import *
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import *
 from sklearn.ensemble import RandomForestRegressor
@@ -20,6 +20,8 @@ reg_models = [LinearRegression, Ridge, RidgeCV, Lasso, LassoCV, LassoLarsCV, Las
           ElasticNet, ElasticNetCV, MultiTaskElasticNet, MultiTaskElasticNetCV, LassoLars,
           OrthogonalMatchingPursuit, BayesianRidge, ARDRegression,  LogisticRegression, LogisticRegressionCV,
           SGDRegressor, PassiveAggressiveRegressor, HuberRegressor, RANSACRegressor, TheilSenRegressor]
+
+scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler, Normalizer, QuantileTransformer, PowerTransformer]
 
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
@@ -51,12 +53,27 @@ def run_sklearn_model(model, train, test, features, target):
     # print("R2: ", r2_score(y_test, y_pred))
     # plot_results(y_test, y_pred, model)
 
+def split_scale(X, y, scaler):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+    if(scaler is None):
+        return(X_train, X_test, y_train, y_test)
+    else:
+        scaler_X = scaler()
+        scaler_X = scaler_X.fit(X_train)
+        X_train = scaler_X.transform(X_train)
+        X_test = scaler_X.transform(X_test)
+        scaler_y = scaler()
+        scaler_y = scaler_y.fit(y_train)
+        y_train = scaler_y.transform(y_train)
+        y_test = scaler_y.transform(y_test)
+        return(X_train, X_test, y_train, y_test)
 
-def do_forex(cur, model, transf = False):
+
+def do_forex(cur, model, transf = None, shuffle=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
@@ -64,13 +81,19 @@ def iterate_markets():
     reg_res = {}
     for f_m in forex_pairs:
         for model in reg_models:
-            print(f_m, model)
-            try:
-                res = do_forex(f_m, model)
-            except:
-                pass
-            res['Forex pair'] = f_m
-            reg_res[model().__class__.__name__] = res
+            for scaler in scalers:
+                for shuffle in [True, False]:
+                    print(f_m, model.__name__, scaler, shuffle)
+                    try:
+                        res = do_forex(f_m, model, scaler, shuffle)
+                    except:
+                        # res = do_forex(f_m, model, scaler, shuffle)
+                        pass
+                    res['Forex pair'] = f_m
+                    res['Transformation'] = scaler
+                    res['Shuffle'] = shuffle
+
+                    reg_res[model().__class__.__name__] = res
     try:
         reg = pd.read_json(json.loads(reg_res), orient='index')
         print(reg)
@@ -79,7 +102,7 @@ def iterate_markets():
         return(reg_res)
 
 res = iterate_markets()
-res_df = pd.DataFrame(res, orient='index', columns= ['Forex pair', 'MSE', 'R2'])
+res_df = pd.DataFrame(res, orient='index', columns= ['Forex pair', 'Transformation', 'Shuffle', 'MSE', 'R2'])
 # for item in res:
 #     res_df = res_df.append(item[list(item.keys())[0]], ignore_index = True)
 # res_df
