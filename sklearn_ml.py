@@ -77,35 +77,43 @@ def do_forex(cur, model, transf = None, shuffle=False):
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
+def do_index(cur, model, transf = None, shuffle=False):
+    index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
+    X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
+    y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    y = y.dropna()
+    X = X[X.index.isin(y.index)]
+    print(cur, transf)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
+    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
+    return(res)
+
 def iterate_markets():
-    reg_res = {}
-    for f_m in forex_pairs:
-        for model in reg_models:
+    reg_res = []
+    for f_m in index_pairs[:1]:
+        print(f_m)
+        for model in reg_models[:1]:
             for scaler in scalers:
                 for shuffle in [True, False]:
-                    print(f_m, model.__name__, scaler, shuffle)
                     try:
-                        res = do_forex(f_m, model, scaler, shuffle)
+                        res = do_index(f_m, model, scaler, shuffle)
                     except:
-                        # res = do_forex(f_m, model, scaler, shuffle)
-                        pass
-                    res['Forex pair'] = f_m
+                        res = do_index(f_m, model, scaler, shuffle)
+                        #pass
+                    res['Index pair'] = f_m
                     res['Transformation'] = scaler
                     res['Shuffle'] = shuffle
-
-                    reg_res[model().__class__.__name__] = res
-    try:
-        reg = pd.read_json(json.loads(reg_res), orient='index')
-        print(reg)
-        return(reg)
-    except:
-        return(reg_res)
+                    res['Model'] = model().__class__.__name__
+                    reg_res.append(res)
+    return(reg_res)
 
 res = iterate_markets()
-res_df = pd.DataFrame(res, orient='index', columns= ['Forex pair', 'Transformation', 'Shuffle', 'MSE', 'R2'])
+#with open('linear_model_res.json', 'w', encoding='utf-8') as f:
+#    json.dump(res, f, ensure_ascii=False, indent=4)
+res_df = pd.DataFrame(res, columns= ['Index pair', 'Transformation', 'Shuffle', 'MSE', 'R2'])
 # for item in res:
 #     res_df = res_df.append(item[list(item.keys())[0]], ignore_index = True)
 # res_df
 # res_df.index = [list(x.keys())[0] for x in res]
-res_df.to_csv("Linear_model_results.csv")
+res_df.to_csv("Linear_index_results.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
