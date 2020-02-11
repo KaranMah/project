@@ -1,0 +1,17 @@
+,Index pair,Transformation,Shuffle,MSE,R2
+0,"('INR', 'BSE Sensex')",,True,6.263130235019195e-05,0.0007055954990186075
+1,"('INR', 'BSE Sensex')",,False,6.263130235019195e-05,0.0007055954990186075
+2,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.MinMaxScaler'>,True,0.006915094217945974,0.0007055954990188296
+3,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.MinMaxScaler'>,False,0.006915094217945974,0.0007055954990188296
+4,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.MaxAbsScaler'>,True,0.017773441592754607,0.0007055954990186075
+5,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.MaxAbsScaler'>,False,0.017773441592754607,0.0007055954990186075
+6,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.StandardScaler'>,True,0.7518961796446749,0.0007055954990178304
+7,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.StandardScaler'>,False,0.7518961796446749,0.0007055954990178304
+8,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.RobustScaler'>,True,0.6595836257756749,0.0007055954990186075
+9,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.RobustScaler'>,False,0.6595836257756749,0.0007055954990186075
+10,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.Normalizer'>,True,0.9854810506408419,0.011508324595488895
+11,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.Normalizer'>,False,0.9854810506408419,0.011508324595488895
+12,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.QuantileTransformer'>,True,0.0748740725790907,-0.001228965266974802
+13,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.QuantileTransformer'>,False,0.0748740725790907,-0.001228965266974802
+14,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.PowerTransformer'>,True,0.7741710378367159,0.0011998684877279064
+15,"('INR', 'BSE Sensex')",<class 'sklearn.preprocessing._data.PowerTransformer'>,False,0.7741710378367159,0.0011998684877279064

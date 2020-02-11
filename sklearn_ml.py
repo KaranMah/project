@@ -81,18 +81,17 @@ def do_index(cur, model, transf = None, shuffle=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
     X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
-    y = y.dropna()
-    X = X[X.index.isin(y.index)]
-    print(cur, transf)
+    X = X.dropna(how='any')
+    y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
 def iterate_markets():
     reg_res = []
-    for f_m in index_pairs[:1]:
+    for f_m in index_pairs:
         print(f_m)
-        for model in reg_models[:1]:
+        for model in reg_models:
             for scaler in scalers:
                 for shuffle in [True, False]:
                     try:
