@@ -89,16 +89,16 @@ def do_index(cur, model, transf = None, shuffle=False):
 
 def iterate_markets():
     reg_res = []
-    for f_m in index_pairs:
+    for f_m in forex_pairs:
         print(f_m)
         for model in reg_models:
             for scaler in scalers:
                 for shuffle in [True, False]:
                     try:
-                        res = do_index(f_m, model, scaler, shuffle)
+                        res = do_forex(f_m, model, scaler, shuffle)
                     except:
-                        res = do_index(f_m, model, scaler, shuffle)
-                        #pass
+                        #res = do_index(f_m, model, scaler, shuffle)
+                        continue
                     res['Index pair'] = f_m
                     res['Transformation'] = scaler
                     res['Shuffle'] = shuffle
@@ -109,10 +109,10 @@ def iterate_markets():
 res = iterate_markets()
 #with open('linear_model_res.json', 'w', encoding='utf-8') as f:
 #    json.dump(res, f, ensure_ascii=False, indent=4)
-res_df = pd.DataFrame(res, columns= ['Index pair', 'Transformation', 'Shuffle', 'MSE', 'R2'])
+res_df = pd.DataFrame(res, columns= ['Index pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
 # for item in res:
 #     res_df = res_df.append(item[list(item.keys())[0]], ignore_index = True)
 # res_df
 # res_df.index = [list(x.keys())[0] for x in res]
-res_df.to_csv("Linear_index_results.csv")
+res_df.to_csv("Linear_forex_results.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
