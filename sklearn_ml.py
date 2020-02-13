@@ -53,8 +53,8 @@ def run_sklearn_model(model, train, test, features, target):
     # print("R2: ", r2_score(y_test, y_pred))
     # plot_results(y_test, y_pred, model)
 
-def split_scale(X, y, scaler):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+def split_scale(X, y, scaler, shuffle=False):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
     if(scaler is None):
         return(X_train, X_test, y_train, y_test)
     else:
@@ -73,7 +73,7 @@ def do_forex(cur, model, transf = None, shuffle=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
@@ -99,7 +99,22 @@ def iterate_markets():
                     except:
                         #res = do_index(f_m, model, scaler, shuffle)
                         continue
-                    res['Index pair'] = f_m
+                    res['Pair'] = f_m
+                    res['Transformation'] = scaler
+                    res['Shuffle'] = shuffle
+                    res['Model'] = model().__class__.__name__
+                    reg_res.append(res)
+    for f_m in index_pairs:
+        print(f_m)
+        for model in reg_models:
+            for scaler in scalers:
+                for shuffle in [True, False]:
+                    try:
+                        res = do_index(f_m, model, scaler, shuffle)
+                    except:
+                        #res = do_index(f_m, model, scaler, shuffle)
+                        continue
+                    res['Pair'] = f_m
                     res['Transformation'] = scaler
                     res['Shuffle'] = shuffle
                     res['Model'] = model().__class__.__name__
@@ -109,10 +124,10 @@ def iterate_markets():
 res = iterate_markets()
 #with open('linear_model_res.json', 'w', encoding='utf-8') as f:
 #    json.dump(res, f, ensure_ascii=False, indent=4)
-res_df = pd.DataFrame(res, columns= ['Index pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
 # for item in res:
 #     res_df = res_df.append(item[list(item.keys())[0]], ignore_index = True)
 # res_df
 # res_df.index = [list(x.keys())[0] for x in res]
-res_df.to_csv("Linear_forex_results.csv")
+res_df.to_csv("linear_models_results.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
