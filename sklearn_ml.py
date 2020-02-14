@@ -83,7 +83,7 @@ def do_index(cur, model, transf = None, shuffle=False):
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
