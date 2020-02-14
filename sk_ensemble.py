@@ -1,4 +1,5 @@
 import json
+import math
 import pprint
 import numpy as np
 import pandas as pd
@@ -6,7 +7,14 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import *
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import *
+from sklearn.kernel_ridge import KernelRidge
+from sklearn.svm import *
+from sklearn.neighbors import *
+from sklearn.gaussian_process import GaussianProcessRegressor
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.tree import *
+from sklearn.experimental import enable_hist_gradient_boosting
+from sklearn.ensemble import *
 from sklearn.metrics import mean_squared_error,r2_score
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
@@ -15,12 +23,13 @@ index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-reg_models = [LinearRegression, Ridge, RidgeCV, Lasso, LassoCV, LassoLarsCV, LassoLarsIC, MultiTaskLasso,
-          ElasticNet, ElasticNetCV, MultiTaskElasticNet, MultiTaskElasticNetCV, LassoLars,
-          OrthogonalMatchingPursuit, BayesianRidge, ARDRegression,  LogisticRegression, LogisticRegressionCV,
-          SGDRegressor, PassiveAggressiveRegressor, HuberRegressor, RANSACRegressor, TheilSenRegressor]
+reg_models = [KernelRidge, SVR, NuSVR, KNeighborsRegressor, RadiusNeighborsRegressor,
+              GaussianProcessRegressor, PLSRegression, DecisionTreeRegressor,
+              BaggingRegressor, AdaBoostRegressor, ExtraTreesRegressor, GradientBoostingRegressor,
+              RandomForestRegressor, HistGradientBoostingRegressor]
 
-scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler, Normalizer, QuantileTransformer, PowerTransformer, FunctionTransformer]
+scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler, Normalizer,
+            QuantileTransformer, PowerTransformer, FunctionTransformer]
 
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
@@ -46,7 +55,15 @@ def run_sklearn_model(model, train, test, features, target):
     except:
         pass
     y_pred = reg.predict(X_test)
-    return({"MSE":mean_squared_error(y_test, y_pred),
+    try:
+        return({"MSE":mean_squared_error(y_test, y_pred),
+            "R2" :r2_score(y_test, y_pred)})
+    except:
+        y_pred = ([x[0] for x in y_pred])
+        for i in range(len(y_pred)):
+            if(np.isnan(y_pred[i])):
+                y_pred[i] = 0
+        return({"MSE":mean_squared_error(y_test, y_pred),
             "R2" :r2_score(y_test, y_pred)})
     # print("MSE: ", mean_squared_error(y_test, y_pred))
     # print("R2: ", r2_score(y_test, y_pred))
@@ -102,8 +119,8 @@ def iterate_markets():
                     try:
                         res = do_forex(f_m, model, scaler, shuffle)
                     except:
-                        # res = do_index(f_m, model, scaler, shuffle)
-                        continue
+                        res = do_index(f_m, model, scaler, shuffle)
+                        # continue
                     res['Pair'] = f_m
                     res['Transformation'] = scaler
                     res['Shuffle'] = shuffle
@@ -128,6 +145,6 @@ def iterate_markets():
 
 res = iterate_markets()
 res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
-print(res_df)
-# res_df.to_csv("linear_models_results.csv")
+# print(res_df)
+res_df.to_csv("ensemble_models_results.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
