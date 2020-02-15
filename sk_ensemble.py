@@ -119,8 +119,8 @@ def iterate_markets():
                     try:
                         res = do_forex(f_m, model, scaler, shuffle)
                     except:
-                        res = do_index(f_m, model, scaler, shuffle)
-                        # continue
+                        #res = do_index(f_m, model, scaler, shuffle)
+                        continue
                     res['Pair'] = f_m
                     res['Transformation'] = scaler
                     res['Shuffle'] = shuffle

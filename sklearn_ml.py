@@ -128,6 +128,6 @@ def iterate_markets():
 
 res = iterate_markets()
 res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
-print(res_df)
-# res_df.to_csv("linear_models_results.csv")
+#print(res_df)
+res_df.to_csv("linear_models_results.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
