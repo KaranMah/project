@@ -17,7 +17,8 @@ from sklearn.naive_bayes import *
 from sklearn.tree import *
 from sklearn.experimental import enable_hist_gradient_boosting
 from sklearn.ensemble import *
-from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.metrics import mean_squared_error,r2_score,f1_score
+from sklearn. preprocessing import *
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
@@ -45,6 +46,8 @@ cls_models = [RidgeClassifier, LogisticRegression,  LogisticRegression, Logistic
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric+'_Ret']
+n_bins = 3
+scalers = [Binarizer, KBinsDiscretizer]
 features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]
 
 def plot_results(y_true, y_pred, model):
@@ -68,14 +71,18 @@ def run_sklearn_model(model, train, test, features, target):
     y_pred = reg.predict(X_test)
     try:
         return({"MSE":mean_squared_error(y_test, y_pred),
-            "R2" :r2_score(y_test, y_pred)})
+            "R2" :r2_score(y_test, y_pred),
+            "F1" :f1_score(y_test, y_pred, average=None),
+            "F1 Weighted" : f1_score(y_pred, y_pred, average='weighted')})
     except:
         y_pred = ([x[0] for x in y_pred])
         for i in range(len(y_pred)):
             if(np.isnan(y_pred[i])):
                 y_pred[i] = 0
         return({"MSE":mean_squared_error(y_test, y_pred),
-            "R2" :r2_score(y_test, y_pred)})
+            "R2" :r2_score(y_test, y_pred),
+            "F1" :f1_score(y_test, y_pred, average=None),
+            "F1 Weighted" : f1_score(y_pred, y_pred, average='weighted')})
     # print("MSE: ", mean_squared_error(y_test, y_pred))
     # print("R2: ", r2_score(y_test, y_pred))
     # plot_results(y_test, y_pred, model)
@@ -84,8 +91,21 @@ def split_scale(X, y, scaler, shuffle=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
     # X_train = Binarizer().fit_transform(X_train)
     # X_test = Binarizer().fit_transform(X_test)
-    y_train = Binarizer().fit_transform(y_train)
-    y_test = Binarizer().fit_transform(y_test)
+
+    if (scaler == scalers[-1]):
+        scaler_X = scaler(n_bins=n_bins, encode='ordinal', strategy='uniform')
+    else:
+        scaler_X = scaler()
+    scaler_X = scaler_X.fit(X_train)
+    X_train = scaler_X.transform(X_train)
+    X_test = scaler_X.transform(X_test)
+    if (scaler == scalers[-1]):
+        scaler_y = scaler(n_bins=n_bins, encode='ordinal', strategy='uniform')
+    else:
+        scaler_y = scaler()
+    scaler_y = scaler_y.fit(y_train)
+    y_train = scaler_y.transform(y_train)
+    y_test = scaler_y.transform(y_test)
     return(X_train, X_test, y_train, y_test)
 
 
