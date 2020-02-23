@@ -39,7 +39,8 @@ scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler, Norma
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric+'_Ret']
-features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]
+forex_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]
+index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in (metrics + ['Volume'])]
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
@@ -56,7 +57,7 @@ def run_sklearn_model(model, train, test, features, target):
     reg = model()#max_iter=1000, tol=1e-3)
     reg.fit(X_train, y_train)
     try:
-        pprint.pprint(dict(zip(features,reg.feature_importances_)))
+        pprint.pprint(dict(zip(X_train.columns.values,reg.feature_importances_)))
     except:
         pass
     y_pred = reg.predict(X_test)
@@ -74,11 +75,9 @@ def run_sklearn_model(model, train, test, features, target):
     # print("R2: ", r2_score(y_test, y_pred))
     # plot_results(y_test, y_pred, model)
 
-def split_scale(X, y, scaler, shuffle=False):
+def split_scale(X, y, scaler, shuffle=False, poly=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
-    if(scaler is None):
-        return(X_train, X_test, y_train, y_test)
-    else:
+    if(scaler):
         scaler_X = scaler()
         if(scaler == scalers[-1]):
             scaler_X = scaler(np.log1p)
@@ -91,53 +90,59 @@ def split_scale(X, y, scaler, shuffle=False):
         scaler_y = scaler_y.fit(y_train)
         y_train = scaler_y.transform(y_train)
         y_test = scaler_y.transform(y_test)
-        return(X_train, X_test, y_train, y_test)
+    if(poly):
+        X_train = PolynomialFeatures(2).fit_transform(X_train)
+        X_test = PolynomialFeatures(2).fit_transform(X_test)
+    return(X_train, X_test, y_train, y_test)
 
 
-def do_forex(cur, model, transf = None, shuffle=False):
+def do_forex(cur, model, transf = None, shuffle=False, poly=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
-    X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
+    X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
-    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly)
+    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return(res)
 
-def do_index(cur, model, transf = None, shuffle=False):
+def do_index(cur, model, transf = None, shuffle=False, poly=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
-    X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
+    X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
-    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly)
+    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), index_features, target)
     return(res)
 
 def iterate_markets():
     reg_res = []
-    for f_m in (forex_pairs+index_pairs)[:1]:
+    for f_m in (forex_pairs+index_pairs):
         print(f_m)
-        for model in reg_models[:1]:
+        for model in reg_models:
             for scaler in scalers:
                 for shuffle in [True, False]:
-                    try:
-                        if(f_m in forex_pairs):
-                            res = do_forex(f_m, model, scaler, shuffle)
-                        else:
-                            res = do_index(f_m, model, scaler, shuffle)
-                    except:
-                        #res = do_index(f_m, model, scaler, shuffle)
-                        continue
-                    res['Pair'] = f_m
-                    res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
-                    res['Shuffle'] = shuffle
-                    res['Model'] = model().__class__.__name__
-                    reg_res.append(res)
+                    for poly in [True, False]:
+                        try:
+                            if(f_m in forex_pairs):
+                                res = do_forex(f_m, model, scaler, shuffle, poly)
+                            else:
+                                res = do_index(f_m, model, scaler, shuffle, poly)
+                        except:
+                            # res = do_forex(f_m, model, scaler, shuffle, poly)
+                            continue
+                        res['Pair'] = f_m
+                        res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
+                        res['Shuffle'] = shuffle
+                        res['Model'] = model().__class__.__name__
+                        res['Poly'] = poly
+                        print(res)
+                        reg_res.append(res)
     return(reg_res)
 
 res = iterate_markets()
-res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'MSE', 'R2'])
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
 # print(res_df)
 res_df.to_csv("sk_regression.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)

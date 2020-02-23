@@ -1,4 +1,4 @@
-%matplotlib inline
+# %matplotlib inline
 
 import json
 import math
@@ -12,12 +12,13 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error,r2_score
 
 import pmdarima as pm
+from fbprophet import Prophet
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
-forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close' and x[1] == 'INR']))
-index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close' and x[1] == 'INR']))
+forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close' and x[1] == 'HKD']))
+index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close' and x[1] == 'HKD']))
 
 
 scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
@@ -81,6 +82,21 @@ def run_auto_arima_model(train, test, features, target):
     #     return({"MSE":mean_squared_error(y_test, y_pred),
     #         "R2" :r2_score(y_test, y_pred)})
 
+
+def run_prophet_model(train, test, features, target):
+    X_train, y_train = train
+    X_test, y_test = test
+    y_train = y_train.reset_index()
+    y_train.columns = ['ds', 'y']
+    m = Prophet()
+    m.fit(y_train)
+    future = m.make_future_dataframe(len(y_test))
+    forecast = m.predict(future)
+    fig1 = m.plot(forecast)
+    plt.show()
+
+
+
 def split_scale(X, y, scaler, shuffle=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
     if(scaler is None):
@@ -100,7 +116,7 @@ def split_scale(X, y, scaler, shuffle=False):
         y_test = scaler_y.transform(y_test)
         return(X_train, X_test, y_train, y_test)
 
-def do_forex(cur, transf = None, shuffle=False):
+def do_forex_arima(cur, transf = None, shuffle=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
@@ -108,7 +124,7 @@ def do_forex(cur, transf = None, shuffle=False):
     res = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
-def do_index(cur, transf = None, shuffle=False):
+def do_index_arima(cur, transf = None, shuffle=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
     X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
@@ -118,4 +134,14 @@ def do_index(cur, transf = None, shuffle=False):
     res = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
-do_index(index_pairs[1], None)
+def do_forex_prophet(cur, transf = None, shuffle=False):
+    forex_cols = [x for x in forex.columns if x[1] == cur]
+    X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
+    y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
+    res = run_prophet_model((X_train, y_train), (X_test, y_test), features, target)
+    return(res)
+
+
+# print(index_pairs)
+do_forex_prophet(forex_pairs[0], None)
