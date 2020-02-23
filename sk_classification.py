@@ -7,17 +7,18 @@ import matplotlib.pyplot as plt
 
 from sklearn.linear_model import *
 from sklearn.preprocessing import *
-from sklearn.model_selection import train_test_split
-from sklearn.kernel_ridge import KernelRidge
+from sklearn.experimental import enable_hist_gradient_boosting
+from sklearn.model_selection import *
+from sklearn.kernel_ridge import *
 from sklearn.svm import *
 from sklearn.neighbors import *
-from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.cross_decomposition import PLSRegression
+from sklearn.gaussian_process import *
+from sklearn.cross_decomposition import *
 from sklearn.naive_bayes import *
 from sklearn.tree import *
-from sklearn.experimental import enable_hist_gradient_boosting
+from sklearn.experimental import *
 from sklearn.ensemble import *
-from sklearn.metrics import mean_squared_error,r2_score,f1_score
+from sklearn.metrics import *
 from sklearn. preprocessing import *
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
@@ -36,7 +37,7 @@ reg_models = [LinearRegression, Ridge, RidgeCV, Lasso, LassoCV, LassoLarsCV, Las
               RandomForestRegressor, HistGradientBoostingRegressor]
 
 cls_models = [RidgeClassifier, LogisticRegression,  LogisticRegression, LogisticRegressionCV,
-              SGDClassification, Perception, PassiveAggressiveClassifier, SVC, NuSVC, LinearSVC,
+              SGDClassifier, Perceptron, PassiveAggressiveClassifier, SVC, NuSVC, LinearSVC,
               KNeighborsClassifier, NearestCentroid, GaussianProcessClassifier,
               GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB,
               DecisionTreeClassifier, BaggingClassifier, AdaBoostClassifier, ExtraTreesClassifier,
