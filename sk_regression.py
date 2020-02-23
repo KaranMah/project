@@ -77,6 +77,9 @@ def run_sklearn_model(model, train, test, features, target):
 
 def split_scale(X, y, scaler, shuffle=False, poly=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
+    if(poly):
+        X_train = PolynomialFeatures(2).fit_transform(X_train)
+        X_test = PolynomialFeatures(2).fit_transform(X_test)
     if(scaler):
         scaler_X = scaler()
         if(scaler == scalers[-1]):
@@ -90,9 +93,6 @@ def split_scale(X, y, scaler, shuffle=False, poly=False):
         scaler_y = scaler_y.fit(y_train)
         y_train = scaler_y.transform(y_train)
         y_test = scaler_y.transform(y_test)
-    if(poly):
-        X_train = PolynomialFeatures(2).fit_transform(X_train)
-        X_test = PolynomialFeatures(2).fit_transform(X_test)
     return(X_train, X_test, y_train, y_test)
 
 
@@ -100,6 +100,7 @@ def do_forex(cur, model, transf = None, shuffle=False, poly=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly)
@@ -110,6 +111,7 @@ def do_index(cur, model, transf = None, shuffle=False, poly=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
     X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly)

@@ -1,4 +1,4 @@
-# %matplotlib inline
+%matplotlib inline
 
 import json
 import math
@@ -12,13 +12,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error,r2_score
 
 import pmdarima as pm
-from fbprophet import Prophet
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
-forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close' and x[1] == 'HKD']))
-index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close' and x[1] == 'HKD']))
+cur = 'HKD'
+
+forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
+index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
 
 scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
@@ -27,7 +28,7 @@ scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric]
-features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['', '_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]
+features = ['Intraday_OC', 'Prev_close_open'] + [y+x for x in ['', '_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in target]# if (x+y) not in target]
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
@@ -39,6 +40,7 @@ def run_auto_arima_model(train, test, features, target):
     X_train, y_train = train
     X_test, y_test = test
     model = pm.auto_arima(y_train, start_p=1, start_q=1,
+                      exogenous=X_train,
                       test='adf',       # use adftest to find optimal 'd'
                       max_p=3, max_q=3, # maximum p and q
                       m=5,              # frequency of series
@@ -55,7 +57,7 @@ def run_auto_arima_model(train, test, features, target):
     model.plot_diagnostics(figsize=(7,5))
     plt.show()
     n_periods = len(y_test)
-    fc, confint = model.predict(n_periods=n_periods, return_conf_int=True)
+    fc, confint = model.predict(n_periods=n_periods, exogenous=X_test, return_conf_int=True)
     index_of_fc = X_test.index
     fc_series = pd.Series(fc, index=index_of_fc)
     lower_series = pd.Series(confint[:, 0], index=index_of_fc)
@@ -81,20 +83,6 @@ def run_auto_arima_model(train, test, features, target):
     #             y_pred[i] = 0
     #     return({"MSE":mean_squared_error(y_test, y_pred),
     #         "R2" :r2_score(y_test, y_pred)})
-
-
-def run_prophet_model(train, test, features, target):
-    X_train, y_train = train
-    X_test, y_test = test
-    y_train = y_train.reset_index()
-    y_train.columns = ['ds', 'y']
-    m = Prophet()
-    m.fit(y_train)
-    future = m.make_future_dataframe(len(y_test))
-    forecast = m.predict(future)
-    fig1 = m.plot(forecast)
-    plt.show()
-
 
 
 def split_scale(X, y, scaler, shuffle=False):
@@ -134,14 +122,7 @@ def do_index_arima(cur, transf = None, shuffle=False):
     res = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
-def do_forex_prophet(cur, transf = None, shuffle=False):
-    forex_cols = [x for x in forex.columns if x[1] == cur]
-    X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
-    y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
-    res = run_prophet_model((X_train, y_train), (X_test, y_test), features, target)
-    return(res)
-
 
 # print(index_pairs)
-do_forex_prophet(forex_pairs[0], None)
+print(do_forex_arima(cur, None, None))
+# do_forex_prophet(forex_pairs[0], None)

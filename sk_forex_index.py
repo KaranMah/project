@@ -98,6 +98,9 @@ def run_sklearn_model(model, train, test, features, target):
 
 def split_scale(X, y, scaler, shuffle=False, poly=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
+    if(poly):
+        X_train = PolynomialFeatures(2).fit_transform(X_train)
+        X_test = PolynomialFeatures(2).fit_transform(X_test)
     if(scaler):
         scaler_X = scaler()
         if(scaler == reg_scalers[-1]):
@@ -120,9 +123,6 @@ def split_scale(X, y, scaler, shuffle=False, poly=False):
         except:
             y_test = np.nan_to_num(y_test, posinf=1, neginf=-1)
             y_test = scaler_y.transform(y_test.reshape(-1, 1))
-    if(poly):
-        X_train = PolynomialFeatures(2).fit_transform(X_train)
-        X_test = PolynomialFeatures(2).fit_transform(X_test)
     return(X_train, X_test, y_train, y_test)
 
 
@@ -138,6 +138,7 @@ def do_forex_index(cur, model, transf = None, shuffle=False, poly=False):
     X = pd.concat([index_X, forex_X], axis=1)
     y = pd.concat([index_y, forex_y], axis=1)
     y_cols = np.concatenate((index_y.columns.values, forex_y.columns.values))
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     tot_res = []
@@ -164,8 +165,8 @@ def iterate_markets():
     reg_res = []
     for f_m in forex_pairs:
         print(f_m)
-        for model in reg_models + cls_models:
-            for scaler in reg_scalers + cls_scalers:
+        for model in (reg_models + cls_models):
+            for scaler in (reg_scalers + cls_scalers):
                 for shuffle in [True, False]:
                     for poly in [True, False]:
                         res = do_forex_index(f_m, model, scaler, shuffle, poly)
@@ -174,7 +175,7 @@ def iterate_markets():
     return(reg_res)
 
 res = iterate_markets()
-res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
-# print(res_df)
-res_df.to_csv("sk_forex_index_regression.csv")
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2', 'F1', 'Precision', 'Recall', 'AUC'])
+print(res_df)
+# res_df.to_csv("sk_forex_index_regression.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
