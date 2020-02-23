@@ -25,9 +25,10 @@ warnings.filterwarnings("ignore")
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
+curr = 'INR'
 
-forex_pairs = list(set([x[1] for x in forex.columns if x[1] == 'HKD']))
-index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[1] == 'HKD']))
+forex_pairs = list(set([x[1] for x in forex.columns if x[1] == curr]))
+index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[1] == curr]))
 
 reg_models = [LinearRegression, Ridge, RidgeCV, Lasso, LassoCV, LassoLarsCV, LassoLarsIC, MultiTaskLasso,
               ElasticNet, ElasticNetCV, MultiTaskElasticNet, MultiTaskElasticNetCV, LassoLars,
@@ -51,7 +52,7 @@ scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
 
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
-target = [metric+'_Ret']
+target = [metric]
 features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['', '_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]
 
 
@@ -64,6 +65,7 @@ def plot_results(y_true, y_pred, model):
     plt.figure()
     plt.plot(plot_df)
     plt.title(model().__class__.__name__)
+    plt.show()
 
 def run_sklearn_model(model, train, test, features, target):
     try:
@@ -74,7 +76,7 @@ def run_sklearn_model(model, train, test, features, target):
     reg = model()#max_iter=1000, tol=1e-3)
     reg.fit(X_train, y_train)
     try:
-        pprint.pprint(dict(zip(features,reg.feature_importances_)))
+        pprint.pprint(dict(zip(X_train.columns.values,reg.feature_importances_)))
     except:
         pass
     y_pred = reg.predict(X_test)
@@ -122,9 +124,9 @@ def split_scale(X, y, scaler, shuffle=False):
         scaler_y = scaler()
         if(scaler == scalers[-1]):
             scaler_y = scaler(np.log1p)
-        scaler_y = scaler_y.fit(y_train)
-        y_train = scaler_y.transform(y_train)
-        y_test = scaler_y.transform(y_test)
+        scaler_y = scaler_y.fit(y_train.values.reshape(-1, 1))
+        y_train = scaler_y.transform(y_train.values.reshape(-1,1))
+        y_test = scaler_y.transform(y_test.values.reshape(-1,1))
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
         return(X_train, X_test, y_train, y_test)
@@ -155,6 +157,31 @@ def do_index(cur, model, transf = None, shuffle=False):
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
     return(res)
 
+def do_forex_index(cur, model, transf = None, shuffle=False):
+    index_cols = [x for x in index.columns if x[1] == cur]
+    forex_cols = [x for x in forex.columns if x[1] == cur]
+    index_X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
+    index_y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    forex_X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
+    forex_y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    index_X.columns = index_X.columns.values
+    forex_X.columns = forex_X.columns.values
+    X = pd.concat([index_X, forex_X], axis=1)
+    y = pd.concat([index_y, forex_y], axis=1)
+    y_cols = np.concatenate((index_y.columns.values, forex_y.columns.values))
+    X = X.dropna(how='any')
+    y = y[y.index.isin(X.index)]
+    for y_col in (y_cols):
+        print(y_col)
+        y_temp = y[y_col]
+        if(model in reg_models):
+            X_train, X_test, y_train, y_test = split_scale(X, y_temp, transf, shuffle)
+        else:
+            X_train, X_test, y_train, y_test = bins_scale(X, y_temp, transf, shuffle)
+        res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
+        print(res)
+
+
 def get_cors_forex(cur, model, transf = None, shuffle=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
@@ -183,8 +210,11 @@ def get_cors_index(cur, model, transf = None, shuffle=False):
     # print(X)
     # print()
     corarr = (pd.DataFrame(X_test, columns = X.columns).join(pd.DataFrame(y_test).rename((lambda x: 'Target'), axis='columns')))
-    corarr.to_csv("Lol_checking.csv")
+    # corarr.to_csv("Lol_checking.csv")
     print(corarr.corr()['Target'])
 
 # get_cors_index(index_pairs[0], LinearRegression, StandardScaler)
-print(do_index(index_pairs[0], RandomForestRegressor, StandardScaler))
+# print(forex_pairs)
+# do_forex_index(forex_pairs[0], LinearRegression, None)
+do_forex(forex_pairs[0], LinearRegression, None)
+# print(forex.columns[:18])
