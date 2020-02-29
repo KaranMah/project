@@ -151,8 +151,8 @@ def iterate_markets():
                                 else:
                                     res = do_index(f_m, model, scaler, shuffle, poly, transf_features_also)
                             except:
-                                res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
-                                # continue
+                                #res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
+                                continue
                             res['Pair'] = f_m
                             res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
                             res['Shuffle'] = shuffle
