@@ -152,29 +152,35 @@ def iterate_markets():
                 for shuffle in [True, False]:
                     for poly in [True, False]:
                         for transf_features_also in [True, False]:
-                            for train_index, test_index in tss.split(lenforex):
-                                try:
-                                    if (f_m in forex_pairs):
+                            try:
+                                if (f_m in forex_pairs):
+                                    temp = [None] * (len(forex)-3)
+                                    for train_index, test_index in tss.split(temp):
                                         res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
-                                                       transf_features_also)
-                                    else:
+                                                   transf_features_also)
+                                else:
+                                    temp = [None] * (len(index) - 4)
+                                    for train_index, test_index in tss.split(temp):
                                         res = do_index(f_m, model, train_index, test_index, scaler, shuffle, poly,
-                                                       transf_features_also)
-                                except:
-                                    res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
-                                    #print("Unknown error: ", sys.exc_info())
-                                    #break
-                                res['Pair'] = f_m
-                                res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
-                                res['Shuffle'] = shuffle
-                                res['Model'] = model().__class__.__name__
-                                res['Poly'] = poly
-                                res['Features transformed'] = transf_features_also
-                                res['Train index'] = len(train_index)
-                                res['Test index'] = len(test_index)
-                                print("lol")
-                                print(res)
-                                reg_res.append(res)
+                                                   transf_features_also)
+                            except:
+                                temp = [None] * (len(forex) - 3)
+                                for train_index, test_index in tss.split(temp):
+                                    res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
+                                                   transf_features_also)
+                                #print("Unknown error: ", sys.exc_info())
+                                #break
+                            res['Pair'] = f_m
+                            res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
+                            res['Shuffle'] = shuffle
+                            res['Model'] = model().__class__.__name__
+                            res['Poly'] = poly
+                            res['Features transformed'] = transf_features_also
+                            res['Train index'] = len(train_index)
+                            res['Test index'] = len(test_index)
+                            print("lol")
+                            print(res)
+                            reg_res.append(res)
     return(reg_res)
 
 res = iterate_markets()
