@@ -122,7 +122,7 @@ def do_forex(cur, model,  train_index, test_index, transf = None, shuffle=False,
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, train_index, test_index, transf, shuffle, poly, transf_features_also
+    X_train, X_test, y_train, y_test = split_scale(X, y, train_index, test_index, transf, shuffle, poly, transf_features_also)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return(res)
 
@@ -146,7 +146,7 @@ def iterate_markets():
                 for shuffle in [True, False]:
                     for poly in [True, False]:
                         for transf_features_also in [True, False]:
-                            for train_index, test_index in tss.split(X):
+                            for train_index, test_index in tss.split(f_m):
                                 try:
                                     if (f_m in forex_pairs):
                                         res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
@@ -173,5 +173,5 @@ res = iterate_markets()
 
 res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
 # print(res_df)
-res_df.to_csv("sk_classification.csv")
+res_df.to_csv("sk_classification_iterative.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
