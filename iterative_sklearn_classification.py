@@ -96,7 +96,6 @@ def run_sklearn_model(model, train, test, features, target):
 def split_scale(X, y, scaler, train_index, test_index, shuffle=False, poly=False, transf_features_also=False):
     X_train, X_test = X.iloc[train_index], X.iloc[test_index]
     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
-    print("lmao")
     if(poly):
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
@@ -154,18 +153,16 @@ def iterate_markets():
                         for transf_features_also in [True, False]:
                             try:
                                 if (f_m in forex_pairs):
-                                    temp = [None] * (len(forex)-3)
-                                    for train_index, test_index in tss.split(temp):
+                                    for train_index, test_index in tss.split(forex[:-1]):
                                         res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                                    transf_features_also)
                                 else:
-                                    temp = [None] * (len(index) - 4)
-                                    for train_index, test_index in tss.split(temp):
+                                    for train_index, test_index in tss.split(index[:-1]):
                                         res = do_index(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                                    transf_features_also)
                             except:
                                 temp = [None] * (len(forex) - 3)
-                                for train_index, test_index in tss.split(temp):
+                                for train_index, test_index in tss.split(forex[:-1]):
                                     res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                                    transf_features_also)
                                 #print("Unknown error: ", sys.exc_info())
