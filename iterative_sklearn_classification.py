@@ -1,5 +1,6 @@
 import json
 import math
+import sys
 import pprint
 import numpy as np
 import pandas as pd
@@ -93,8 +94,10 @@ def run_sklearn_model(model, train, test, features, target):
     # plot_results(y_test, y_pred, model)
 
 def split_scale(X, y, scaler, train_index, test_index, shuffle=False, poly=False, transf_features_also=False):
-    X_train, X_test = X.iloc[train_index, :], X.iloc[test_index, :]
+    print("lol split here")
+    X_train, X_test = X.iloc[train_index], X.iloc[test_index]
     y_train, y_test = y.iloc[train_index], y.iloc[test_index]
+    print(X_test)
     if(poly):
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
@@ -124,6 +127,7 @@ def do_forex(cur, model,  train_index, test_index, transf = None, shuffle=False,
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, train_index, test_index, transf, shuffle, poly, transf_features_also)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
+    print(res)
     return(res)
 
 def do_index(cur, model,  train_index, test_index, transf = None, shuffle=False, poly=False, transf_features_also=False):
@@ -146,7 +150,7 @@ def iterate_markets():
                 for shuffle in [True, False]:
                     for poly in [True, False]:
                         for transf_features_also in [True, False]:
-                            for train_index, test_index in tss.split(f_m):
+                            for train_index, test_index in tss.split(forex):
                                 try:
                                     if (f_m in forex_pairs):
                                         res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
@@ -156,7 +160,8 @@ def iterate_markets():
                                                        transf_features_also)
                                 except:
                                     # res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
-                                    continue
+
+                                    print(sys.exc_info()[0])
                                 res['Pair'] = f_m
                                 res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
                                 res['Shuffle'] = shuffle
@@ -164,14 +169,15 @@ def iterate_markets():
                                 res['Poly'] = poly
                                 res['Features transformed'] = transf_features_also
                                 res['Train index'] = train_index
-                                res['test index'] = test_index
+                                res['Test index'] = test_index
+                                print("lol")
                                 print(res)
                                 reg_res.append(res)
     return(reg_res)
 
 res = iterate_markets()
 
-res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'Train index', 'Test index', 'F1', 'Precision', 'Recall', 'AUC'])
 # print(res_df)
 res_df.to_csv("sk_classification_iterative.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
