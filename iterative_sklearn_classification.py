@@ -4,7 +4,7 @@ import pprint
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from sklearn.model_selection import TimeSeriesSplit
 from sklearn.linear_model import *
 from sklearn.preprocessing import *
 from sklearn.experimental import enable_hist_gradient_boosting
@@ -44,7 +44,6 @@ cls_models = [RidgeClassifier, LogisticRegression,  LogisticRegression, Logistic
               GradientBoostingClassifier, RandomForestClassifier, HistGradientBoostingClassifier]
 
 
-time_split_ratio = [(0.2, 0.5), (0.3, 0.33), (0.4, 0.25), (0.5, 0.2), (0.6, 0.166), (0.7, 0.14), (0.8, 0.125), (0.9, 0.11), (1, 0.1)]
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric+'_Ret']
@@ -93,8 +92,9 @@ def run_sklearn_model(model, train, test, features, target):
     # print("R2: ", r2_score(y_test, y_pred))
     # plot_results(y_test, y_pred, model)
 
-def split_scale(X, y, scaler, shuffle=False, poly=False, transf_features_also=False, test_size=0.1):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=test_size)
+def split_scale(X, y, scaler, train_index, test_index, shuffle=False, poly=False, transf_features_also=False):
+    X_train, X_test = X.iloc[train_index, :], X.iloc[test_index, :]
+    y_train, y_test = y.iloc[train_index], y.iloc[test_index]
     if(poly):
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
@@ -116,30 +116,29 @@ def split_scale(X, y, scaler, shuffle=False, poly=False, transf_features_also=Fa
     return(X_train, X_test, y_train, y_test)
 
 
-def do_forex(cur, model, transf = None, shuffle=False, poly=False, transf_features_also=False, split_ratio = (1,0.1) ):
+def do_forex(cur, model,  train_index, test_index, transf = None, shuffle=False, poly=False, transf_features_also=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
-    forex_temp = forex[:split_ratio[0]*forex.count]
-    X = forex_temp[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
-    y = forex_temp[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
+    y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly, transf_features_also, split_ratio[1])
+    X_train, X_test, y_train, y_test = split_scale(X, y, train_index, test_index, transf, shuffle, poly, transf_features_also
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return(res)
 
-def do_index(cur, model, transf = None, shuffle=False, poly=False, transf_features_also=False, split_ratio = (1,0.1) ):
+def do_index(cur, model,  train_index, test_index, transf = None, shuffle=False, poly=False, transf_features_also=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
-    index_temp = index[:split_ratio[0] * index.count]
-    X = index_temp[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
-    y = index_temp[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
+    y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly, transf_features_also, split_ratio[1])
+    X_train, X_test, y_train, y_test = split_scale(X, y, train_index, test_index, transf, shuffle, poly, transf_features_also)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), index_features, target)
     return(res)
 
 def iterate_markets():
     reg_res = []
+    tss = TimeSeriesSplit(n_splits=10)
     for f_m in (forex_pairs+index_pairs):
         print(f_m)
         for model in cls_models:
@@ -147,14 +146,14 @@ def iterate_markets():
                 for shuffle in [True, False]:
                     for poly in [True, False]:
                         for transf_features_also in [True, False]:
-                            for spilt_ratio in time_split_ratio:
+                            for train_index, test_index in tss.split(X):
                                 try:
                                     if (f_m in forex_pairs):
-                                        res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also,
-                                                       spilt_ratio)
+                                        res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
+                                                       transf_features_also)
                                     else:
-                                        res = do_index(f_m, model, scaler, shuffle, poly, transf_features_also,
-                                                       spilt_ratio)
+                                        res = do_index(f_m, model, train_index, test_index, scaler, shuffle, poly,
+                                                       transf_features_also)
                                 except:
                                     # res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
                                     continue
@@ -164,8 +163,8 @@ def iterate_markets():
                                 res['Model'] = model().__class__.__name__
                                 res['Poly'] = poly
                                 res['Features transformed'] = transf_features_also
-                                res['Number of years'] = split_ratio[0]
-                                res['split ratio'] = split_ratio[1]~
+                                res['Train index'] = train_index
+                                res['test index'] = test_index
                                 print(res)
                                 reg_res.append(res)
     return(reg_res)
