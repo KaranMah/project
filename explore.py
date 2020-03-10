@@ -13,7 +13,16 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
+forex.columns = list(forex.columns)
+index.columns = list(index.columns)
 
+joint = pd.concat([forex, index], axis=1)
+res = joint.corr()
+
+print(joint.columns)
+print(forex.shape, index.shape, joint.shape, res.shape)
+
+res.to_csv("corr_res.csv")
 ###############################################################################
 ###############################################################################
 

@@ -133,8 +133,12 @@ def split_scale(X, y, scaler, shuffle=False):
 
 def do_forex(cur, model, transf = None, shuffle=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
+    old_y = forex[[col for col in forex_cols if col[0] in target]][:-1]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    print(X)
+    print(old_y, y)
+    lol
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     if(model in reg_models):
@@ -216,5 +220,5 @@ def get_cors_index(cur, model, transf = None, shuffle=False):
 # get_cors_index(index_pairs[0], LinearRegression, StandardScaler)
 # print(forex_pairs)
 # do_forex_index(forex_pairs[0], LinearRegression, None)
-do_forex(forex_pairs[0], LinearRegression, None)
+do_forex(forex_pairs[0], RandomForestRegressor, None)
 # print(forex.columns[:18])
