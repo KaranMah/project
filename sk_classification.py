@@ -72,6 +72,7 @@ def run_sklearn_model(model, train, test, features, target):
     except:
         pass
     y_pred = reg.predict(X_test)
+    plot_confusion_matrix(reg, X = X_test, y_true = y_test, display_labels=np.unique(y_test))
     try:
         return({"F1" :f1_score(y_test, y_pred, average='weighted'),
             "Precision": precision_score(y_test, y_pred, average='weighted'),
@@ -121,7 +122,7 @@ def do_forex(cur, model, transf = None, shuffle=False, poly=False, transf_featur
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
-    y = y[y.index.isin(X.index)]
+    y = y[y.index.isin(X.index)]    
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly, transf_features_also)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return(res)
@@ -151,8 +152,8 @@ def iterate_markets():
                                 else:
                                     res = do_index(f_m, model, scaler, shuffle, poly, transf_features_also)
                             except:
-                                res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
-                                # continue
+                                #res = do_forex(f_m, model, scaler, shuffle, poly, transf_features_also)
+                                continue
                             res['Pair'] = f_m
                             res['Transformation'] = scaler().__class__.__name__ if scaler is not None else None
                             res['Shuffle'] = shuffle
@@ -165,6 +166,6 @@ def iterate_markets():
 
 res = iterate_markets()
 res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
-# print(res_df)
 res_df.to_csv("sk_classification.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
+do_forex('MNT', RandomForestClassifier, Binarizer, False, True, True)

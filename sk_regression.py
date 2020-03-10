@@ -120,7 +120,7 @@ def do_index(cur, model, transf = None, shuffle=False, poly=False):
 
 def iterate_markets():
     reg_res = []
-    for f_m in (forex_pairs+index_pairs):
+    for f_m in ['MNT', 'BDT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]:#(forex_pairs+index_pairs):
         print(f_m)
         for model in reg_models:
             for scaler in scalers:
