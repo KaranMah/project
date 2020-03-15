@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.preprocessing import *
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.metrics import mean_squared_error,r2_score, f1_score, precision_score, recall_score, roc_auc_score
 
 import pmdarima as pm
 
@@ -59,9 +59,9 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     res['Seasonal_Order'] = model.seasonal_order
     res['AIC'] = model.aicc()
     res['BIC'] = model.bic()
-    # print(model.summary())
-    # model.plot_diagnostics(figsize=(7,5))
-    # plt.show()
+    print(model.summary())
+    model.plot_diagnostics(figsize=(7,5))
+    plt.show()
     n_periods = len(y_test)
     fc, confint = model.predict(n_periods=n_periods,
                                 exogenous=X_test,
@@ -70,20 +70,20 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     fc_series = pd.Series(fc, index=index_of_fc)
     res['MSE'] = mean_squared_error(y_test, fc)
     res['R2'] = r2_score(y_test, fc)
-    # lower_series = pd.Series(confint[:, 0], index=index_of_fc)
-    # upper_series = pd.Series(confint[:, 1], index=index_of_fc)
-    # plt.plot(y_train)
-    # plt.plot(fc_series, color='darkgreen')
-    # plt.plot(y_test, color='red')
-    # plt.fill_between(lower_series.index,
-    #                  lower_series,
-    #                  upper_series,
-    #                  color='k', alpha=.15)
-    # plt.title("Final Forecast")
-    # plt.show()
+    lower_series = pd.Series(confint[:, 0], index=index_of_fc)
+    upper_series = pd.Series(confint[:, 1], index=index_of_fc)
+    plt.plot(y_train)
+    plt.plot(fc_series, color='darkgreen')
+    plt.plot(y_test, color='red')
+    plt.fill_between(lower_series.index,
+                     lower_series,
+                     upper_series,
+                     color='k', alpha=.15)
+    plt.title("Final Forecast")
+    plt.show()
     # y_pred = reg.predict(X_test)
     # plot_results(pd.DataFrame(y_test), pd.DataFrame(y_pred), model)
-    return(res)
+    return(res, fc)
 
 
 def split_scale(X, y, scaler):
@@ -112,12 +112,21 @@ def split_scale(X, y, scaler):
             y_test = scaler_y.transform(y_test.reshape(-1, 1))
     return(X_train, X_test, y_train, y_test)
 
+def check_bins(real, pred):
+    y_test = Binarizer().transform(pd.DataFrame(real).pct_change().dropna())
+    y_pred = Binarizer().transform(pd.DataFrame(pred).pct_change().dropna())
+    return({"F1" :f1_score(y_test, y_pred, average='weighted'),
+        "Precision": precision_score(y_test, y_pred, average='weighted'),
+        "Recall": recall_score(y_test, y_pred, average='weighted')})
+
 def do_forex_arima(cur, target, is_exog=False, transf = None):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    metrics = check_bins(y_test, y_pred)
+    res.update(metrics)
     return(res)
 
 def do_index_arima(cur, target, is_exog=False, transf = None):
@@ -127,12 +136,13 @@ def do_index_arima(cur, target, is_exog=False, transf = None):
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
-    return(res)
+    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    metrics = check_bins(y_test, y_pred)
+    return(res.update(metrics))
 
 def iterate_markets():
     reg_res = []
-    for f_m in (forex_pairs+index_pairs):
+    for f_m in ['MNT', 'BDT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]:#(forex_pairs+index_pairs):
         print(f_m)
         for m in [metric, metric+'_Ret']:
             if(m == metric):
@@ -157,8 +167,10 @@ def iterate_markets():
                     reg_res.append(res)
     return(reg_res)
 
-
+#
 res = iterate_markets()
-res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC'])
-# print(res_df)
+res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
+# # print(res_df)
 res_df.to_csv("naive_arima.csv")
+# res = do_forex_arima('MNT', 'Close', True, None)
+# print(res)

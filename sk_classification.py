@@ -36,7 +36,7 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 #               BaggingRegressor, AdaBoostRegressor, ExtraTreesRegressor, GradientBoostingRegressor,
 #               RandomForestRegressor, HistGradientBoostingRegressor]
 
-cls_models = [RidgeClassifier, LogisticRegression,  LogisticRegression, LogisticRegressionCV,
+cls_models = [RidgeClassifier, LogisticRegression,  LogisticRegressionCV,
               SGDClassifier, Perceptron, PassiveAggressiveClassifier, SVC, NuSVC, LinearSVC,
               KNeighborsClassifier, NearestCentroid, GaussianProcessClassifier,
               GaussianNB, MultinomialNB, ComplementNB, BernoulliNB, CategoricalNB,
@@ -65,7 +65,7 @@ def run_sklearn_model(model, train, test, features, target):
         X_test, y_test = test
     except:
         pass
-    reg = model()#max_iter=1000, tol=1e-3)
+    reg = model()#penalty='elasticnet')#solver='liblinear', max_iter=1000)#, tol=1e-3)
     reg.fit(X_train, y_train)
     try:
         pprint.pprint(dict(zip(X_train.columns.values,reg.feature_importances_)))
@@ -122,7 +122,7 @@ def do_forex(cur, model, transf = None, shuffle=False, poly=False, transf_featur
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
-    y = y[y.index.isin(X.index)]    
+    y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly, transf_features_also)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return(res)
@@ -139,7 +139,7 @@ def do_index(cur, model, transf = None, shuffle=False, poly=False, transf_featur
 
 def iterate_markets():
     reg_res = []
-    for f_m in (forex_pairs+index_pairs):
+    for f_m in ['MNT', 'BDT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]:#(forex_pairs+index_pairs):
         print(f_m)
         for model in cls_models:
             for scaler in scalers:
@@ -164,8 +164,9 @@ def iterate_markets():
                             reg_res.append(res)
     return(reg_res)
 
-res = iterate_markets()
-res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
-res_df.to_csv("sk_classification.csv")
+# res = iterate_markets()
+# res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
+# print(res_df)
+# res_df.to_csv("sk_classification.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
-do_forex('MNT', RandomForestClassifier, Binarizer, False, True, True)
+do_forex('MNT', Perceptron, Binarizer, True, True, True)
