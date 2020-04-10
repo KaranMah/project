@@ -55,8 +55,10 @@ def readData (curr):
     data.index = pd.to_datetime(data.index)
     return data
 
+forex_pairs.sort()
 for f_m in forex_pairs:
     cur_files = [f for f in files if f_m in f]
+    cur_files.sort()
     if len(cur_files) != 0:
         lower_lim = int(re.findall('\d+', cur_files[0])[0])
         upper_lim = int(re.findall('\d+', cur_files[len(cur_files) - 1])[0]) + 5
@@ -64,7 +66,7 @@ for f_m in forex_pairs:
         print(cur)
         data = readData(cur)
         bt = Backtest(data, ClasStrat, cash=10000, commission=0.002)
-        stats = bt.optimize(window=range(5, 10, 1),
+        stats = bt.optimize(window=range(2, 10, 1),
                             i=range(lower_lim, upper_lim, 5),
                             n1=range(5, 30, 5),
                             n2=range(20, 80, 5),
