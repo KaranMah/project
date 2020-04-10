@@ -1,4 +1,4 @@
-%matplotlib inline
+#%matplotlib inline
 
 import json
 import math
@@ -60,8 +60,8 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     res['AIC'] = model.aicc()
     res['BIC'] = model.bic()
     print(model.summary())
-    model.plot_diagnostics(figsize=(7,5))
-    plt.show()
+    #model.plot_diagnostics(figsize=(7,5))
+    #plt.show()
     n_periods = len(y_test)
     fc, confint = model.predict(n_periods=n_periods,
                                 exogenous=X_test,
@@ -72,15 +72,15 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     res['R2'] = r2_score(y_test, fc)
     lower_series = pd.Series(confint[:, 0], index=index_of_fc)
     upper_series = pd.Series(confint[:, 1], index=index_of_fc)
-    plt.plot(y_train)
-    plt.plot(fc_series, color='darkgreen')
-    plt.plot(y_test, color='red')
-    plt.fill_between(lower_series.index,
-                     lower_series,
-                     upper_series,
-                     color='k', alpha=.15)
-    plt.title("Final Forecast")
-    plt.show()
+    #plt.plot(y_train)
+    #plt.plot(fc_series, color='darkgreen')
+    #plt.plot(y_test, color='red')
+    #plt.fill_between(lower_series.index,
+    #                 lower_series,
+    #                 upper_series,
+    #                 color='k', alpha=.15)
+    #plt.title("Final Forecast")
+    #plt.show()
     # y_pred = reg.predict(X_test)
     # plot_results(pd.DataFrame(y_test), pd.DataFrame(y_pred), model)
     return(res, fc)
