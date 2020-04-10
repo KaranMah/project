@@ -28,10 +28,10 @@ def majority(pred, n=4):
     return res
 
 class ClasStrat(Strategy):
-    window = 4
+    window = 8
     i = 30
     n1 = 15
-    n2 = 30
+    n2 = 60
 
     def init(self):
         # Precompute two moving averages
@@ -66,11 +66,11 @@ data = readData(cur)
 bt = Backtest(data, ClasStrat, cash=10000, commission=0.002)
 res = bt.run()
 print(res)
-bt.plot()
-stats = bt.optimize(window=range(2, 10, 1),
+
+stats = bt.optimize(window=range(5, 10, 1),
                     i=range(30, 55, 5),
                     n1=range(5, 30, 5),
-                    n2=range(10, 70, 5),
+                    n2=range(20, 80, 5),
                     maximize='Equity Final [$]',
                     constraint=lambda p: p.n1 < p.n2)
 print(stats)

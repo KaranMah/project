@@ -161,7 +161,7 @@ def iterate_markets():
     shuffle = False
     poly = False
     transf_features_also = False
-    for f_m in ["BDT"]:  # "(forex_pairs+index_pairs):
+    for f_m in forex_pairs:
         # print(f_m)
         for model in cls_models:
             # model ="SVC"
