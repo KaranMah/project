@@ -43,7 +43,10 @@ forex_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x 
 index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in (metrics + ['Volume'])]
 
 def plot_results(y_true, y_pred, model):
-    plot_df = pd.concat([y_true.reset_index(drop=True), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
+    try:
+        plot_df = pd.concat([y_true.reset_index(drop=True), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
+    except:
+        plot_df = pd.concat([pd.DataFrame(y_true), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
     plt.figure()
     plt.plot(plot_df)
     plt.title(model().__class__.__name__)
@@ -61,6 +64,7 @@ def run_sklearn_model(model, train, test, features, target):
     except:
         pass
     y_pred = reg.predict(X_test)
+    plot_results(y_test, y_pred, model)
     try:
         return({"MSE":mean_squared_error(y_test, y_pred),
             "R2" :r2_score(y_test, y_pred)})
@@ -73,7 +77,6 @@ def run_sklearn_model(model, train, test, features, target):
             "R2" :r2_score(y_test, y_pred)})
     # print("MSE: ", mean_squared_error(y_test, y_pred))
     # print("R2: ", r2_score(y_test, y_pred))
-    # plot_results(y_test, y_pred, model)
 
 def split_scale(X, y, scaler, shuffle=False, poly=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
@@ -143,8 +146,8 @@ def iterate_markets():
                         reg_res.append(res)
     return(reg_res)
 
-res = iterate_markets()
-res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
+# res = iterate_markets()
+# res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
 # print(res_df)
-res_df.to_csv("sk_regression.csv")
-# do_stuff(["HKD", "Hang Seng"], LinearRegression)
+# res_df.to_csv("sk_regression.csv")
+do_forex('MNT', LinearRegression, None, True)

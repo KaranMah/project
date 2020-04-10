@@ -13,13 +13,9 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
-forex.columns = list(forex.columns)
-index.columns = list(index.columns)
-
 joint = pd.concat([forex, index], axis=1)
 res = joint.corr()
 
-print(joint.columns)
 print(forex.shape, index.shape, joint.shape, res.shape)
 
 res.to_csv("corr_res.csv")
@@ -35,6 +31,32 @@ ax = sns.heatmap(
 
 ###############################################################################
 ###############################################################################
+
+val = ('Close', 'BDT')
+corr_res = pd.DataFrame(columns = ['Metric', 'Value', 'Lagged'])
+
+for col in (list(forex.columns) + list(index.columns)):
+    try:
+        temp_col = forex[col]
+    except:
+        temp_col = index[col]
+    corr_res = corr_res.append({'Metric': col,
+                                'Value': forex[val].corr(temp_col),
+                                'Lagged': forex[val].corr(temp_col.shift(-1, fill_value=0))},
+                                ignore_index=True)
+
+corr_res.to_csv(val[0]+"_"+val[1]+".csv")
+
+###############################################################################
+###############################################################################
+
+
+forex.columns = list(forex.columns)
+index.columns = list(index.columns)
+
+###############################################################################
+###############################################################################
+
 
 def stationarity(forex, index, save=False):
     col_names = forex.columns

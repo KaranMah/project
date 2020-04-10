@@ -59,19 +59,33 @@ def plot_results(y_true, y_pred, model):
     plt.plot(plot_df)
     plt.title(model().__class__.__name__)
 
+
+def save_res_to_csv(data):
+    data.to_csv(cur+"_"+mod+".csv")
+
 def run_sklearn_model(model, train, test, features, target):
     try:
         X_train, y_train = train
         X_test, y_test = test
     except:
         pass
-    reg = model()#penalty='elasticnet')#solver='liblinear', max_iter=1000)#, tol=1e-3)
+    reg = model(n_estimators=1000)#kernel='poly', degree=5)#penalty='elasticnet')#solver='liblinear', max_iter=1000)#, tol=1e-3)
+    print(X_train)
+    print(y_train)
     reg.fit(X_train, y_train)
+    # print(reg.coef_)
     try:
         pprint.pprint(dict(zip(X_train.columns.values,reg.feature_importances_)))
     except:
         pass
     y_pred = reg.predict(X_test)
+    save_data = pd.concat([pd.DataFrame(y_test), pd.DataFrame(y_pred)], axis=1,
+                          ignore_index=True)
+    # save_data.index = X_test.index
+    save_data.columns = ['Real', 'Pred']
+    print(save_data)
+    # save_res_to_csv(save_data)
+
     plot_confusion_matrix(reg, X = X_test, y_true = y_test, display_labels=np.unique(y_test))
     try:
         return({"F1" :f1_score(y_test, y_pred, average='weighted'),
@@ -114,7 +128,9 @@ def split_scale(X, y, scaler, shuffle=False, poly=False, transf_features_also=Fa
     scaler_y = scaler_y.fit(y_train)
     y_train = scaler_y.transform(y_train)
     y_test = scaler_y.transform(y_test)
-    return(X_train, X_test, y_train, y_test)
+    y_train[y_train == 0] = -1
+    y_test[y_test == 0] = -1
+    return(X_train, X_test, y_train.astype(int), y_test.astype(int))
 
 
 def do_forex(cur, model, transf = None, shuffle=False, poly=False, transf_features_also=False):
@@ -139,7 +155,7 @@ def do_index(cur, model, transf = None, shuffle=False, poly=False, transf_featur
 
 def iterate_markets():
     reg_res = []
-    for f_m in ['MNT', 'BDT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]:#(forex_pairs+index_pairs):
+    for f_m in ['MNT', 'BDT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')][1:2]:#(forex_pairs+index_pairs):
         print(f_m)
         for model in cls_models:
             for scaler in scalers:
@@ -169,4 +185,7 @@ def iterate_markets():
 # print(res_df)
 # res_df.to_csv("sk_classification.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
-do_forex('MNT', Perceptron, Binarizer, True, True, True)
+# cur = 'BDT'
+# mod = LogisticRegression
+# do_forex(cur, mod, Binarizer, False, False, False)
+do_index(('PKR', 'Karachi 100'), RandomForestClassifier, Binarizer, False, False, False)
