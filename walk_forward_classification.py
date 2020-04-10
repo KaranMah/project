@@ -1,23 +1,14 @@
 import pandas as pd
 import numpy as np
-from sklearn.ensemble import BaggingClassifier, AdaBoostClassifier, ExtraTreesClassifier, GradientBoostingClassifier, \
-    RandomForestClassifier
-from sklearn.ensemble._hist_gradient_boosting.gradient_boosting import HistGradientBoostingClassifier
-from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.linear_model import *
 from sklearn.metrics import *
-from sklearn.model_selection import TimeSeriesSplit
-from sklearn.naive_bayes import GaussianNB, ComplementNB, MultinomialNB, CategoricalNB
-from sklearn.neighbors import KNeighborsClassifier, NearestCentroid
 from sklearn.preprocessing import *
 from sklearn.svm import *
 import warnings
-from sklearn.exceptions import DataConversionWarning, ConvergenceWarning
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.exceptions import DataConversionWarning
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
-# warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 forex = pd.read_csv('prep_forex.csv', header=[0, 1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
@@ -25,10 +16,6 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-# cls_models = [Perceptron, ElasticNetCV, RidgeClassifierCV, ElasticNet]
-# cls_models = [RidgeClassifier, RidgeClassifierCV , SVC, Perceptro】
-# cls_models = [SGDClassifier, PassiveAggressiveClassifier, NuSVC, LinearSVC]
-# cls_models =[ AdaBoostClassifier, ExtraTreesClassifier, GradientBoostingClassifier,
 cls_models = [SVC]
 reg_models = [SVR, LinearSVR, LinearRegression]
 
@@ -52,8 +39,6 @@ def run_sklearn_model(model, train, test, features, target):
 
     period = len(X_train)
     y_train, y_test = y_train.astype(int), y_test.astype(int)
-    # y_train = y_train.values
-    # y_test = y_test.values
     prediction = []
     data = X_train.values
     data_y = y_train
@@ -72,11 +57,8 @@ def run_sklearn_model(model, train, test, features, target):
         data_y = np.delete(data_y, 0, 0)
     y_true = np.vstack((y_train, y_test))
     print(model.__name__ + " " + str(period) + " accuracy = ", accuracy_score(y_true, prediction))
-    # print(y_test, prediction)
     print(confusion_matrix(y_true, prediction))
     pred = pd.DataFrame(prediction)
-    y_true = pd.DataFrame(y_true)
-    pred = pd.concat([pred, y_true], axis=1)
     x_true = pd.concat([X_train, X_test], axis=0)
     pred.index = x_true.index
     return pred
@@ -113,7 +95,6 @@ def do_forex(cur, model, train_index, test_index, transf=None, shuffle=False, po
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly,
                                                    transf_features_also)
-    # res = walk_forward((X_train, y_train), (X_test, y_test))
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), forex_features, target)
     return (res)
 
@@ -124,67 +105,58 @@ def do_index(cur, model, train_index, test_index, transf=None, shuffle=False, po
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, transf, shuffle, poly,
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly,
                                                    transf_features_also)
-    # res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), index_features, target)
-    res = walk_forward((X_train, y_train), (X_test, y_test))
+    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), index_features, target)
     return (res)
 
 
-def walk_forward(train, test):
-    try:
-        X_train, y_train = train
-        X_test, y_test = test
-    except:
-        pass
-    prediction = []
-    data = X_train.values
-
-    for i, t in enumerate(X_test.values):
-        model = (ExponentialSmoothing(data).fit())
-        y = model.predict()
-        prediction.append(1 if y[0] > 0.001 else 0)
-        data = np.append(data, t)
-
-    pred = pd.DataFrame(prediction)
-    print(confusion_matrix(y_test, pred))
-    y_test = pd.DataFrame(y_test)
-    pred = pd.concat([pred, y_test], axis=1)
-    pred.index = X_test.index
-    return pred
+# def walk_forward(train, test):
+#     try:
+#         X_train, y_train = train
+#         X_test, y_test = test
+#     except:
+#         pass
+#     prediction = []
+#     data = X_train.values
+#
+#     for i, t in enumerate(X_test.values):
+#         model = (ExponentialSmoothing(data).fit())
+#         y = model.predict()
+#         prediction.append(1 if y[0] > 0.001 else 0)
+#         data = np.append(data, t)
+#
+#     pred = pd.DataFrame(prediction)
+#     print(confusion_matrix(y_test, pred))
+#     y_test = pd.DataFrame(y_test)
+#     pred = pd.concat([pred, y_test], axis=1)
+#     pred.index = X_test.index
+#     return pred
 
 
 def iterate_markets():
-    # tss = TimeSeriesSplit(n_splits=10)
-    # print(tss)
-
     shuffle = False
     poly = False
     transf_features_also = False
     for f_m in forex_pairs:
-        # print(f_m)
+        print(f_m)
         for model in cls_models:
-            # model ="SVC"
             for scaler in scalers:
-                reg_res = pd.DataFrame()
-                for i in range(30, 55, 5):
+               for i in range(30, 55, 5):
                     try:
                         if (f_m in forex_pairs):
                             train_index = i
                             test_index = 0
-                            # for train_index, test_index in tss.split(forex[:-1]):
                             res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                            transf_features_also)
-                            res.columns = [ "pred", "true"]
+                            res.columns = ["pred"]
                         else:
-                            # for train_index, test_index in tss.split(index[:-1]):
                             train_index = int(len(index) * .8)
                             test_index = 0
-
                             res = do_index(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                            transf_features_also)
                             reg_res = res
-                            reg_res.columns=["pred", "true"]
+                            reg_res.columns = ["pred"]
                         res.to_csv(str(f_m) + "_" + model.__name__ + "_sliding_" + str(i) + "_results.csv")
                     except Exception as e:
                         print(e)

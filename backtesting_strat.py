@@ -1,18 +1,13 @@
-import warnings
+import glob
+import re
+
 from backtesting import *
 from backtesting import Backtest
 from backtesting.lib import crossover
 from backtesting.test import SMA
 import pandas as pd
 import numpy as np
-from backtesting.test import GOOG
-from sklearn.exceptions import DataConversionWarning
-from sklearn.metrics import confusion_matrix, accuracy_score
-from sklearn.preprocessing import Binarizer
 from sklearn.svm import SVC
-
-warnings.filterwarnings(action='ignore', category=DataConversionWarning)
-# warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 forex = pd.read_csv('prep_forex.csv', header=[0, 1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
@@ -22,6 +17,7 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 
 cls_models = [SVC]
 
+files = glob.glob("*_SVC_sliding*")
 
 def majority(pred, n=4):
     res = pred.rolling(n).sum()
@@ -59,23 +55,22 @@ def readData (curr):
     data.index = pd.to_datetime(data.index)
     return data
 
-strat = ["Classification", "Regressiont"] 
-
-cur ="BDT"
-data = readData(cur)
-bt = Backtest(data, ClasStrat, cash=10000, commission=0.002)
-res = bt.run()
-print(res)
-
-stats = bt.optimize(window=range(5, 10, 1),
-                    i=range(30, 55, 5),
-                    n1=range(5, 30, 5),
-                    n2=range(20, 80, 5),
-                    maximize='Equity Final [$]',
-                    constraint=lambda p: p.n1 < p.n2)
-print(stats)
-
-
+for f_m in forex_pairs:
+    cur_files = [f for f in files if f_m in f]
+    if len(cur_files) != 0:
+        lower_lim = int(re.findall('\d+', cur_files[0])[0])
+        upper_lim = int(re.findall('\d+', cur_files[len(cur_files) - 1])[0]) + 5
+        cur = f_m
+        print(cur)
+        data = readData(cur)
+        bt = Backtest(data, ClasStrat, cash=10000, commission=0.002)
+        stats = bt.optimize(window=range(5, 10, 1),
+                            i=range(lower_lim, upper_lim, 5),
+                            n1=range(5, 30, 5),
+                            n2=range(20, 80, 5),
+                            maximize='Equity Final [$]',
+                            constraint=lambda p: p.n1 < p.n2)
+        print(stats)
 
 # metric = 'Close'
 # metrics = ['Open', 'Close', 'Low', 'High']
