@@ -17,7 +17,7 @@ from sklearn.tree import DecisionTreeClassifier
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
-#warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
+# warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 forex = pd.read_csv('prep_forex.csv', header=[0, 1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
@@ -25,11 +25,12 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-#cls_models = [Perceptron, ElasticNetCV, RidgeClassifierCV, ElasticNet]
+# cls_models = [Perceptron, ElasticNetCV, RidgeClassifierCV, ElasticNet]
 # cls_models = [RidgeClassifier, RidgeClassifierCV , SVC, Perceptro】
 # cls_models = [SGDClassifier, PassiveAggressiveClassifier, NuSVC, LinearSVC]
 # cls_models =[ AdaBoostClassifier, ExtraTreesClassifier, GradientBoostingClassifier,
-cls_models = [RandomForestClassifier, HistGradientBoostingClassifier]
+cls_models = [SVC]
+reg_models = [SVR, LinearSVR, LinearRegression]
 
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
@@ -51,47 +52,55 @@ def run_sklearn_model(model, train, test, features, target):
 
     period = len(X_train)
     y_train, y_test = y_train.astype(int), y_test.astype(int)
+    # y_train = y_train.values
+    # y_test = y_test.values
     prediction = []
     data = X_train.values
     data_y = y_train
     for i, t in enumerate(X_test.values):
-        if i % 100 == 0:
-            print(i)
         reg = model()
         reg.fit(data, data_y)
+        if i == 0:
+            y = reg.predict(X_train)
+            for elem in y:
+                prediction.append(elem)
         y = reg.predict([t])
-        prediction.append(y)
+        prediction.append(y[0])
         data = np.vstack((data, t))
         data = np.delete(data, 0, 0)
         data_y = np.append(data_y, y_test[i])
         data_y = np.delete(data_y, 0, 0)
-
-    print(model.__name__ + " "+ str(period) +" accuray = ", accuracy_score(y_test, prediction))
-    print(confusion_matrix(y_test, prediction))
+    y_true = np.vstack((y_train, y_test))
+    print(model.__name__ + " " + str(period) + " accuracy = ", accuracy_score(y_true, prediction))
+    # print(y_test, prediction)
+    print(confusion_matrix(y_true, prediction))
     pred = pd.DataFrame(prediction)
-    y_test = pd.DataFrame(y_test)
-    pred = pd.concat([pred, y_test], axis=1)
-    pred.index = X_test.index
+    y_true = pd.DataFrame(y_true)
+    pred = pd.concat([pred, y_true], axis=1)
+    x_true = pd.concat([X_train, X_test], axis=0)
+    pred.index = x_true.index
     return pred
 
 
 def split_scale(X, y, scaler, train_index, test_index, shuffle=False, poly=False, transf_features_also=False):
     X_train, X_test = X.iloc[:train_index], X.iloc[train_index:]
     y_train, y_test = y.iloc[:train_index], y.iloc[train_index:]
-    scaler_X = scaler()
-    if (transf_features_also):
-        X_train = scaler_X.transform(X_train)
-        X_test = scaler_X.transform(X_test)
-    scaler_y = scaler()
+    if scaler:
 
-    y_train = np.array(y_train).reshape(1, -1)
-    y_test = np.array(y_test).reshape(1, -1)
-    y_train = scaler_y.transform(y_train)
-    y_test = scaler_y.transform(y_test)
-    y_train[y_train == 0] = -1
-    y_test[y_test == 0] = -1
-    y_test = np.array(y_test).reshape(-1, 1)
-    y_train = np.array(y_train).reshape(-1, 1)
+        scaler_X = scaler()
+        if (transf_features_also):
+            X_train = scaler_X.transform(X_train)
+            X_test = scaler_X.transform(X_test)
+        scaler_y = scaler()
+
+        y_train = np.array(y_train).reshape(1, -1)
+        y_test = np.array(y_test).reshape(1, -1)
+        y_train = scaler_y.transform(y_train)
+        y_test = scaler_y.transform(y_test)
+        y_train[y_train == 0] = -1
+        y_test[y_test == 0] = -1
+        y_test = np.array(y_test).reshape(-1, 1)
+        y_train = np.array(y_train).reshape(-1, 1)
 
     return (X_train, X_test, y_train, y_test)
 
@@ -130,6 +139,7 @@ def walk_forward(train, test):
         pass
     prediction = []
     data = X_train.values
+
     for i, t in enumerate(X_test.values):
         model = (ExponentialSmoothing(data).fit())
         y = model.predict()
@@ -157,7 +167,7 @@ def iterate_markets():
             # model ="SVC"
             for scaler in scalers:
                 reg_res = pd.DataFrame()
-                for i in range(5, 55, 5):
+                for i in range(30, 55, 5):
                     try:
                         if (f_m in forex_pairs):
                             train_index = i
@@ -165,7 +175,7 @@ def iterate_markets():
                             # for train_index, test_index in tss.split(forex[:-1]):
                             res = do_forex(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                            transf_features_also)
-                            reg_res = res  # pd.concat([reg_res, res])
+                            res.columns = [ "pred", "true"]
                         else:
                             # for train_index, test_index in tss.split(index[:-1]):
                             train_index = int(len(index) * .8)
@@ -173,11 +183,12 @@ def iterate_markets():
 
                             res = do_index(f_m, model, train_index, test_index, scaler, shuffle, poly,
                                            transf_features_also)
-                            reg_res = pd.concat([reg_res, res])
-                        reg_res.to_csv(str(f_m) + "_" + model.__name__ + "_sliding_"+i+"_results.csv")
-                    except:
-                        pass
+                            reg_res = res
+                            reg_res.columns=["pred", "true"]
+                        res.to_csv(str(f_m) + "_" + model.__name__ + "_sliding_" + str(i) + "_results.csv")
+                    except Exception as e:
+                        print(e)
+
 
 
 iterate_markets()
-
