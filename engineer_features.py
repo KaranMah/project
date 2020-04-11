@@ -79,14 +79,28 @@ def save_results(tag):
     except IOError:
         print("couldn't write into  file")
 
+def append_results(tag):
+    csv_columns = ['Date', 'Average', 'Max', 'Min', 'Standard Deviation', 'Variance', 'Positive Multiplied', 'Count']
+    csv_name = "/data/aggregate/" + tag + "_aggregated_data.csv"
+    try:
+        with open(csv_name, 'a') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=csv_columns)
+            writer.writeheader()
+            for data in scores:
+                writer.writerow(data)
+    except IOError:
+        print("couldn't write into  file")
+
 
 RESULTS_PATH = "/data/results"
+AGGREGATE_PATH = "/data/aggregate/"
 hashtags = []
 
-
-allFiles = [f for f in listdir(RESULTS_PATH) if isfile(join(RESULTS_PATH, f))]
+countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
+allFiles = [f for f in listdir(RESULTS_PATH) if (isfile(join(RESULTS_PATH, f)) and any(j in f for j in countryList))]
 
 for file_name in allFiles:
+    print(file_name)
     name = file_name.split('_')
     if name[0] == "r":
         newTag = name[1]
@@ -94,11 +108,14 @@ for file_name in allFiles:
     else:
         newTag = name[0]
         timestamp = 'datetime'
-
+    scores = get_results(newTag)
+    
     if newTag not in hashtags:
         hashtags.append(newTag)
-        scores = get_results(newTag)
         save_results(newTag)
+    else:
+        append_results(newTag)
+        
 
 
 

@@ -1,0 +1,5 @@
+nohup: ignoring input
+Traceback (most recent call last):
+  File "arima_naive.py", line 14, in <module>
+    import pmdarima as pm
+ModuleNotFoundError: No module named 'pmdarima'
