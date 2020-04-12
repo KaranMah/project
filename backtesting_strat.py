@@ -52,14 +52,16 @@ def readData (curr):
     forex_cols_bt = [x for x in forex.columns if x[1] == curr]
     data = forex[[col for col in forex_cols_bt if col[0] in forex_features_bt]][:-1]
     data.columns = [x[0] for x in list(data.columns)]
+    data = data.dropna(how='any')
     data.index = pd.to_datetime(data.index)
     return data
 
 forex_pairs.sort()
-for f_m in forex_pairs:
+for f_m in ["IDR"]:
     cur_files = [f for f in files if f_m in f]
     cur_files.sort()
     if len(cur_files) != 0:
+        print(cur_files)
         lower_lim = int(re.findall('\d+', cur_files[0])[0])
         upper_lim = int(re.findall('\d+', cur_files[len(cur_files) - 1])[0]) + 5
         cur = f_m
