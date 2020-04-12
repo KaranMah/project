@@ -86,8 +86,8 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     return(res, fc)
 
 
-def split_scale(X, y, scaler):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=0.2)
+def split_scale(X, y, scaler, split_size = 0.2):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=split_size)
     if(scaler):
         scaler_X = scaler()
         if(scaler == scalers[-1]):
