@@ -11,13 +11,10 @@ from sklearn.preprocessing import *
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error,r2_score, f1_score, precision_score, recall_score, roc_auc_score
 
-
+from arch import arch_model
 
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
-
-cur = ('INR', 'Nifty 50')
-# cur = 'INR'
 
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
@@ -36,7 +33,7 @@ def plot_results(y_true, y_pred, model):
     plt.plot(plot_df)
     plt.title(model().__class__.__name__)
 
-def run_auto_arima_model(train, test, features, target, is_exog=False):
+def run_garch_model(train, test, features, target, is_exog=False):
     X_train, y_train = train
     X_test, y_test = test
     if(not is_exog):
@@ -119,24 +116,24 @@ def check_bins(real, pred):
         "Precision": precision_score(y_test, y_pred, average='weighted'),
         "Recall": recall_score(y_test, y_pred, average='weighted')})
 
-def do_forex_arima(cur, target, is_exog=False, transf = None):
+def do_forex_garch(cur, target, is_exog=False, transf = None):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    res, y_pred = run_garch_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
     metrics = check_bins(y_test, y_pred)
     res.update(metrics)
     return(res)
 
-def do_index_arima(cur, target, is_exog=False, transf = None):
+def do_index_garch(cur, target, is_exog=False, transf = None):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
     X = index[[col for col in index_cols if col[0] in features + ['Time features']]][:-1]
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    res, y_pred = run_garch_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
     metrics = check_bins(y_test, y_pred)
     return(res.update(metrics))
 
@@ -153,9 +150,9 @@ def iterate_markets():
                 for is_exog in [True, False]:
                     try:
                         if(f_m in forex_pairs):
-                            res = do_forex_arima(f_m, [m], is_exog, scaler)
+                            res = do_forex_garch(f_m, [m], is_exog, scaler)
                         else:
-                            res = do_index_arima(f_m, [m], is_exog, scaler)
+                            res = do_index_garch(f_m, [m], is_exog, scaler)
                     except:
                         # res = do_forex_arima(f_m, [m], is_exog, scaler)
                         continue
@@ -172,5 +169,5 @@ def iterate_markets():
 # res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
 # # print(res_df)
 # res_df.to_csv("naive_arima.csv")
-res = do_forex_arima('BDT', 'Close', True, None)
+res = do_forex_garch('BDT', 'Close', True, None)
 print(res)

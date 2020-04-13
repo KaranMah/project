@@ -13,6 +13,9 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
+forex.columns = list(forex.columns)
+index.columns = list(index.columns)
+
 joint = pd.concat([forex, index], axis=1)
 res = joint.corr()
 
@@ -30,6 +33,10 @@ ax = sns.heatmap(
 
 
 ###############################################################################
+fig, axes = plt.subplots(nrows=2)
+axes[0].plot(forex[('Close', 'BDT')], color='blue')
+axes[1].plot(forex[('Close', 'BDT')].rolling(5).std(ddof=0), color='red')
+plt.show()
 ###############################################################################
 
 val = ('Close', 'BDT')
@@ -51,8 +58,7 @@ corr_res.to_csv(val[0]+"_"+val[1]+".csv")
 ###############################################################################
 
 
-forex.columns = list(forex.columns)
-index.columns = list(index.columns)
+
 
 ###############################################################################
 ###############################################################################

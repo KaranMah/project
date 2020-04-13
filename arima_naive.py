@@ -18,6 +18,7 @@ index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
 # cur = ('INR', 'Nifty 50')
 # cur = 'INR'
+cur = 'BDT'
 
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
@@ -36,7 +37,7 @@ def plot_results(y_true, y_pred, model):
     plt.plot(plot_df)
     plt.title(model().__class__.__name__)
 
-def run_auto_arima_model(train, test, features, target, is_exog=False):
+def run_auto_arima_model(train, test, features, target, is_exog, y_dates):
     X_train, y_train = train
     X_test, y_test = test
     if(not is_exog):
@@ -66,7 +67,7 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
     fc, confint = model.predict(n_periods=n_periods,
                                 exogenous=X_test,
                                 return_conf_int=True)
-    index_of_fc = y_test.index
+    index_of_fc = y_dates
     fc_series = pd.Series(fc, index=index_of_fc)
     res['MSE'] = mean_squared_error(y_test, fc)
     res['R2'] = r2_score(y_test, fc)
@@ -88,6 +89,7 @@ def run_auto_arima_model(train, test, features, target, is_exog=False):
 
 def split_scale(X, y, scaler, split_size = 0.2):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=False, test_size=split_size)
+    y_dates = y_test.index
     if(scaler):
         scaler_X = scaler()
         if(scaler == scalers[-1]):
@@ -110,7 +112,7 @@ def split_scale(X, y, scaler, split_size = 0.2):
         except:
             y_test = np.nan_to_num(y_test, posinf=1, neginf=-1)
             y_test = scaler_y.transform(y_test.reshape(-1, 1))
-    return(X_train, X_test, y_train, y_test)
+    return(X_train, X_test, y_train, y_test, y_dates)
 
 def check_bins(real, pred):
     if(metric[-3:] == 'Ret'):
@@ -123,26 +125,28 @@ def check_bins(real, pred):
         "Precision": precision_score(y_test, y_pred, average='weighted'),
         "Recall": recall_score(y_test, y_pred, average='weighted')})
 
-def save_to_csv(real, pred):
-    save_data = pd.DataFrame(columns = ['y_true_class', 'y_pred_class', 'y_true_reg', 'y_pred_reg'], index = real.index)
-    save_data['y_true_reg'] = real.values
+def save_to_csv(real, pred, y_dates):
+    save_data = pd.DataFrame(columns = ['y_true_class', 'y_pred_class', 'y_true_reg', 'y_pred_reg'], index = y_dates)
+    try:
+        save_data['y_true_reg'] = real
+    except:
+        save_data['y_true_reg'] = real.values
     save_data['y_pred_reg'] = pred
     if(metric[-3:] == 'Ret'):
         save_data['y_true_class'] = np.sign(save_data['y_true_reg'])
         save_data['y_pred_class'] = np.sign(save_data['y_pred_reg'])
-        save_data.to_csv(real.columns[0][1]+"_"+real.columns[0][0]+"_Arima.csv")
     else:
         save_data['y_true_class'] = np.sign(save_data['y_true_reg'].pct_change())
         save_data['y_pred_class'] = np.sign(save_data['y_pred_reg'].pct_change())
-        save_data.to_csv(real.columns[0][1]+"_"+real.columns[0][0]+"_Arima.csv")
+    save_data.to_csv(real.columns[0][1]+"_"+real.columns[0][0]+"_Arima_log.csv")
 
 def do_forex_arima(cur, target, is_exog=False, transf = None):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] == metric]].shift(-1)[:-1]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
-    save_to_csv(y_test, y_pred)
+    X_train, X_test, y_train, y_test, y_dates = split_scale(X, y, transf)
+    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog, y_dates)
+    save_to_csv(y_test, y_pred, y_dates)
     metrics = check_bins(y_test, y_pred)
     res.update(metrics)
     return(res)
@@ -153,8 +157,8 @@ def do_index_arima(cur, target, is_exog=False, transf = None):
     y = index[[col for col in index_cols if col[0] == metric]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf)
-    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog)
+    X_train, X_test, y_train, y_test, y_dates = split_scale(X, y, transf)
+    res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog, y_dates)
     metrics = check_bins(y_test, y_pred)
     return(res.update(metrics))
 
@@ -190,5 +194,5 @@ def iterate_markets():
 # res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
 # # print(res_df)
 # res_df.to_csv("naive_arima.csv")
-res = do_forex_arima('BDT', metric, True, None)
+res = do_forex_arima(cur, metric, True, FunctionTransformer)
 print(res)
