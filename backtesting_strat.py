@@ -1,6 +1,5 @@
 import glob
 import re
-
 from backtesting import *
 from backtesting import Backtest
 from backtesting.lib import crossover
@@ -23,6 +22,9 @@ def majority(pred, n=4):
     res = pred.rolling(n).sum()
     return res
 
+def getTom(pred):
+    return pred
+
 class ClasStrat(Strategy):
     window = 8
     i = 30
@@ -37,14 +39,19 @@ class ClasStrat(Strategy):
         maj = np.array(majority(res, self.window)).ravel()
         self.sma1 = self.I(SMA, maj, self.n1)
         self.sma2 = self.I(SMA, maj, self.n2)
+        self.tom = self.I(getTom, res)
     
     def next(self):
-        if crossover(self.sma1, self.sma2):
-            self.buy()
-
-            # Else, if sma1 crosses below sma2, sell it
-        elif crossover(self.sma2, self.sma1):
+        if self.tom[-1] == -1:
             self.sell()
+        elif self.tom[-1] == 1:
+            self.buy()
+        # if crossover(self.sma1, self.sma2):
+        #     self.buy()
+        #
+        #     # Else, if sma1 crosses below sma2, sell it
+        # elif crossover(self.sma2, self.sma1):
+        #     self.sell()
 
 
 def readData (curr):
@@ -57,24 +64,26 @@ def readData (curr):
     return data
 
 forex_pairs.sort()
-for f_m in ["IDR"]:
+for f_m in ["BDT"]:
     cur_files = [f for f in files if f_m in f]
     cur_files.sort()
     if len(cur_files) != 0:
-        print(cur_files)
+        # print(cur_files)
         lower_lim = int(re.findall('\d+', cur_files[0])[0])
         upper_lim = int(re.findall('\d+', cur_files[len(cur_files) - 1])[0]) + 5
         cur = f_m
         print(cur)
         data = readData(cur)
         bt = Backtest(data, ClasStrat, cash=10000, commission=0.002)
-        stats = bt.optimize(window=range(2, 10, 1),
-                            i=range(lower_lim, upper_lim, 5),
-                            n1=range(5, 30, 5),
-                            n2=range(20, 80, 5),
-                            maximize='Equity Final [$]',
-                            constraint=lambda p: p.n1 < p.n2)
-        print(stats)
+        res = bt.run()
+        bt.plot()
+        # stats = bt.optimize(window=range(2, 10, 1),
+        #                     i=range(lower_lim, upper_lim, 5),
+        #                     n1=range(5, 30, 5),
+        #                     n2=range(20, 80, 5),
+        #                     maximize='Equity Final [$]',
+        #                     constraint=lambda p: p.n1 < p.n2)
+        # print(stats)
 
 # metric = 'Close'
 # metrics = ['Open', 'Close', 'Low', 'High']
