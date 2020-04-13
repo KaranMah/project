@@ -18,6 +18,10 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 cls_models = [RidgeClassifier]
 reg_models = [SVR, LinearSVR, LinearRegression]
 
+forex_feature = "VND"
+index_feature = ("MNT", "MNE Top 20")
+
+
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric + '_Ret']
@@ -29,7 +33,7 @@ index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y + x for 
                                                                       ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45',
                                                                        '_MTD', '_YTD'] for y in (metrics + ['Volume'])]
 
-scalers = [MinMaxScaler, StandardScaler]
+scalers = [MinMaxScaler, StandardScaler, FunctionTransformer]
 
 def run_sklearn_model(model, train, test, features, target):
     X_train, y_train = train
@@ -89,9 +93,18 @@ def split_scale(X, y, scaler, train_index, test_index, shuffle=False, poly=False
     return (X_train, X_test, y_train, y_test)
 
 
+def add_cross_domain_features(f_feat = forex_feature, i_feat = index_feature):
+    index_cols = index_cols = [x for x in index.columns if x[1] == i_feat[0] and x[2] == i_feat[1]]
+    X_i = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
+    forex_cols = [x for x in forex.columns if x[1] == f_feat]
+    X_f = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
+    cd_feats = pd.concat([X_i, X_f], axis=1)
+    return(cd_feats)
+
 def do_forex(cur, model, train_index, test_index, transf=None, shuffle=False, poly=False, transf_features_also=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
+    X = X.join(add_cross_domain_features())
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
@@ -103,6 +116,7 @@ def do_forex(cur, model, train_index, test_index, transf=None, shuffle=False, po
 def do_index(cur, model, train_index, test_index, transf=None, shuffle=False, poly=False, transf_features_also=False):
     index_cols = [x for x in index.columns if x[1] == cur[0] and x[2] == cur[1]]
     X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
+    X = X.join(add_cross_domain_features())
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
@@ -140,7 +154,6 @@ def iterate_markets():
                     # except Exception as e:
                     #     print(e)
             reg_res.to_csv(str(f_m) + "_" + model.__name__ + "_sliding_sclaed_results.csv")
-
 
 
 iterate_markets()
