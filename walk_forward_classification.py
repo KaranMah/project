@@ -101,11 +101,21 @@ def add_cross_domain_features(f_feat = forex_feature, i_feat = index_feature):
     cd_feats = pd.concat([X_i, X_f], axis=1)
     return(cd_feats)
 
+def add_cross_domain_features(feat):
+    if(isinstance(feat, tuple)):
+        index_cols = index_cols = [x for x in index.columns if x[1] == i_feat[0] and x[2] == i_feat[1]]
+        X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
+    else:
+        forex_cols = [x for x in forex.columns if x[1] == f_feat]
+        X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
+    return(X)
+
 def do_forex(cur, model, train_index, test_index, transf=None, shuffle=False, poly=False, transf_features_also=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     X = X.join(add_cross_domain_features())
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
@@ -118,6 +128,7 @@ def do_index(cur, model, train_index, test_index, transf=None, shuffle=False, po
     X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
     X = X.join(add_cross_domain_features())
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
