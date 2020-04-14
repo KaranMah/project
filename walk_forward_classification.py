@@ -116,6 +116,7 @@ def add_cross_domain_features(feat):
         X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     return(X)
 
+
 def do_forex(cur, model, train_index, test_index, feat, transf=None, shuffle=False, poly=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
@@ -138,6 +139,7 @@ def do_index(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     if feat:
         X = X.join(add_cross_domain_features(feat))
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
+    X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)

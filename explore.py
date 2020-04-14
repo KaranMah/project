@@ -13,8 +13,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
-forex.columns = list(forex.columns)
-index.columns = list(index.columns)
+
 
 joint = pd.concat([forex, index], axis=1)
 res = joint.corr()
@@ -22,6 +21,30 @@ res = joint.corr()
 print(forex.shape, index.shape, joint.shape, res.shape)
 
 res.to_csv("corr_res.csv")
+
+###############################################################################
+
+val = ('Close', 'LKR', 'CSE All-Share')
+corr_res = pd.DataFrame(columns = ['Metric', 'Value', 'Lagged'])
+
+
+for col in (list(forex.columns) + list(index.columns)):
+    try:
+        temp_col = forex[col]
+    except:
+        temp_col = index[col]
+    corr_res = corr_res.append({'Metric': col,
+                                'Value': index[val].corr(temp_col),
+                                'Lagged': index[val].corr(temp_col.shift(-1, fill_value=0))},
+                                ignore_index=True)
+
+corr_res.to_csv('_'.join(val)+"_corr.csv")
+
+###############################################################################
+###############################################################################
+forex.columns = list(forex.columns)
+index.columns = list(index.columns)
+
 ###############################################################################
 ###############################################################################
 
@@ -37,25 +60,7 @@ fig, axes = plt.subplots(nrows=2)
 axes[0].plot(forex[('Close', 'BDT')], color='blue')
 axes[1].plot(forex[('Close', 'BDT')].rolling(5).std(ddof=0), color='red')
 plt.show()
-###############################################################################
 
-val = ('Close', 'BDT')
-corr_res = pd.DataFrame(columns = ['Metric', 'Value', 'Lagged'])
-
-for col in (list(forex.columns) + list(index.columns)):
-    try:
-        temp_col = forex[col]
-    except:
-        temp_col = index[col]
-    corr_res = corr_res.append({'Metric': col,
-                                'Value': forex[val].corr(temp_col),
-                                'Lagged': forex[val].corr(temp_col.shift(-1, fill_value=0))},
-                                ignore_index=True)
-
-corr_res.to_csv(val[0]+"_"+val[1]+".csv")
-
-###############################################################################
-###############################################################################
 
 
 
