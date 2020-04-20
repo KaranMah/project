@@ -32,6 +32,8 @@ gamma = ['auto', 'scale']
 
 result = (0, None, None, None)
 result_lock = Lock()
+columns=['accuracy', 'args', 'target_market', 'feature_used']
+result_df = pd.DataFrame(columns=columns)
 
 metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High']
@@ -144,6 +146,7 @@ def do_index(cur, model, train_index, test_index, feat, transf, kwargs):
 
 def iterate_markets(model, f_m, feat, kwargs):
     global result
+    global result_df
     reg_res = (0, None, None, None)
     for i in range(30, 55, 5):
         try:
@@ -165,8 +168,8 @@ def iterate_markets(model, f_m, feat, kwargs):
     with result_lock:
         if result[0] < reg_res[0]:
             result = reg_res
-    print("lol")
-    
+        result_df = pd.concat([result_df, pd.DataFrame([reg_res], columns=columns)])
+
 
 def main():
     numTot = len(cls_models) * len(target_markets) * len(features[target_markets[0]])
@@ -200,6 +203,7 @@ def main():
         thread.join()
 
     print("best score =", result)
+    result_df.to_csv("./optimization_results/optimization_mult.csv")
     
 main()
 

@@ -9,6 +9,8 @@ from threading import Thread, Lock
 from sklearn.exceptions import DataConversionWarning
 
 result = (0, None, None, None)
+columns=['accuracy', 'args', 'target_market', 'feature_used']
+result_df = pd.DataFrame(columns=columns)
 result_lock = Lock()
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.filterwarnings(action='ignore', category=UserWarning)
@@ -58,26 +60,8 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     reg = model(**kwargs)
     reg.fit(X_train, y_train)
     prediction = reg.predict(X_test)
-    # prediction = []
-    # data = X_train.values
-    # data_y = y_train
-    # for i, t in enumerate(X_test.values):
-    #     reg = model(**kwargs)
-    #     reg.fit(data, data_y)
-    #     if i == 0:
-    #         y = reg.predict(X_train)
-    #         for elem in y:
-    #             prediction.append(elem)
-    #     y = reg.predict([t])
-    #     prediction.append(y[0])
-    #     data = np.vstack((data, t))
-    #     data = np.delete(data, 0, 0)
-    #     data_y = np.append(data_y, y_test[i])
-    #     data_y = np.delete(data_y, 0, 0)
-    # y_true = np.vstack((y_train, y_test))
     prediction = pd.DataFrame(prediction)
     acc = accuracy_score(y_test, prediction)
-    # print("accurcy for " + xstr(feat) + " with period " + str(period)+ "s="+str(acc))
     return acc
 
 
@@ -148,6 +132,7 @@ def do_index(cur, model, feat, transf, kwargs):
 def iterate_markets(model, f_m, feat, kwargs):
     reg_res = (0, None, None, None)
     global result
+    global result_df
     try:
         if f_m in forex_pairs:
             res = do_forex(f_m, model, feat, None, kwargs)
@@ -163,7 +148,8 @@ def iterate_markets(model, f_m, feat, kwargs):
     with result_lock:
         if result[0] < reg_res[0]:
             result = reg_res
-    print(result)
+        temp_df = pd.DataFrame([reg_res], columns=columns)
+        result_df = pd.concat([result_df, temp_df])
 
 
 def main():
@@ -199,6 +185,8 @@ def main():
             print(e)
     
     print(result)
+
+    result_df.to_csv("./optimization_results/sec_opt.csv")
 main()
 
 
