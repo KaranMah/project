@@ -154,7 +154,7 @@ def iterate_markets(model, f_m, feat, kwargs):
 
 def main():
     params = []
-
+    global result_df
     for k in kernel:
         for c in C:
             for g in gamma:
@@ -162,31 +162,30 @@ def main():
                     params.append({'kernel': k, 'C': c, 'gamma': g, 'tol':t})
     print(len(params))
     threads = []
-    for model_name in cls_models:
-        for f in target_markets:
+    for f in target_markets:
+        for model_name in cls_models:
             for feature in features[f]:
                 for ind, p in enumerate(params):
                     try:
                         threads.append(Thread(target=iterate_markets, args=(model_name, f, feature, p)))
                     except Exception as e:
                         print("main, load ", e)
+        print(len(threads))
 
-    for thread in threads:
-        try:
-            thread.start()
-        except Exception as e:
-            print("main, start ", e)
+        for thread in threads:
+            try:
+                thread.start()
+            except Exception as e:
+                print("main, start ", e)
 
-    for thread in threads:
-        try:
+        for thread in threads:
             thread.join()
-            
-        except Exception as e:
-            print(e)
-    
-    print(result)
 
-    result_df.to_csv("./optimization_results/sec_opt.csv")
+        threads = []
+
+        print("best score =", result)
+        result_df.to_csv("./optimization_results/sec_opt_"+f+".csv")
+        result_df = pd.DataFrame(columns=columns)
 main()
 
 

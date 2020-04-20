@@ -164,7 +164,6 @@ def iterate_markets(model, f_m, feat, kwargs):
 
         except Exception as e:
             pass
-    print(reg_res)
     with result_lock:
         if result[0] < reg_res[0]:
             result = reg_res
@@ -173,7 +172,7 @@ def iterate_markets(model, f_m, feat, kwargs):
 
 def main():
     numTot = len(cls_models) * len(target_markets) * len(features[target_markets[0]])
-    print(numTot)
+    global result_df
     params = []
     result = (0,None, None, None)
     for k in kernel:
@@ -183,27 +182,30 @@ def main():
 
     print(len(params))
     threads = []
-    for model_name in cls_models:
-        for f in target_markets:
+    for f in target_markets:
+        for model_name in cls_models:
             for feature in features[f]:
                 for ind, p in enumerate(params):
                     try:
                         threads.append(Thread(target=iterate_markets, args=(model_name, f, feature, p)))
                     except Exception as e:
                         print("main, load ", e)
-    print(len(threads))
+        print(len(threads))
 
-    for thread in threads:
-        try:
-            thread.start()
-        except Exception as e:
-            print("main, start ", e)
+        for thread in threads:
+            try:
+                thread.start()
+            except Exception as e:
+                print("main, start ", e)
 
-    for thread in threads:
-        thread.join()
+        for thread in threads:
+            thread.join()
 
-    print("best score =", result)
-    result_df.to_csv("./optimization_results/optimization_mult.csv")
+        threads = []
+
+        print("best score =", result)
+        result_df.to_csv("./optimization_results/optimization_mult_"+f+".csv")
+        result_df = pd.DataFrame(columns=columns)
     
 main()
 
