@@ -203,7 +203,7 @@ def main():
 
         threads = []
 
-        print("best score =", result)
+        print("best score "+f+" =", result)
         result_df.to_csv("./optimization_results/optimization_mult_"+f+".csv")
         result_df = pd.DataFrame(columns=columns)
     
