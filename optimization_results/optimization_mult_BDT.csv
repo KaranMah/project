@@ -1,1 +1,9 @@
 ,accuracy,args,target_market,feature_used
+0,0.6582278481012658,"{'kernel': 'linear', 'C': 0.3, 'gamma': 'auto'}",BDT,
+0,0.666283084004603,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}",BDT,
+0,0.6666666666666666,"{'kernel': 'rbf', 'C': 0.9, 'gamma': 'scale'}",BDT,
+0,0.667433831990794,"{'kernel': 'rbf', 'C': 0.6, 'gamma': 'scale'}",BDT,
+0,0.6685845799769851,"{'kernel': 'rbf', 'C': 0.5, 'gamma': 'scale'}",BDT,
+0,0.6689681626390487,"{'kernel': 'rbf', 'C': 0.6, 'gamma': 'scale'}",BDT,
+0,0.6693517453011124,"{'kernel': 'rbf', 'C': 0.7, 'gamma': 'scale'}",BDT,
+0,0.6708860759493671,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}",BDT,

@@ -18,9 +18,10 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [SVC]
+cls_models = [RidgeClassifier]
 
-target_markets = ['BDT', 'MNT', ('LKR', 'CSE All-Share')]
+target_markets = ['BDT', 'MNT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
+
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -162,9 +163,9 @@ def iterate_markets(model, f_m, feat, kwargs):
 
             if reg_res[0] < res:
                 reg_res = (res, kwargs, f_m, feat)
-            print(reg_res)
+            #print(reg_res)
             with result_lock:
-                print(reg_res)
+                #print(reg_res)
                 if result[0] < reg_res[0]:
                     result = reg_res
                     result_df = pd.concat([result_df, pd.DataFrame([reg_res], columns=columns)])
@@ -207,7 +208,7 @@ def main():
         threads = []
 
         print("best score %s=%s" % (f, result,))
-        result_df.to_csv("./optimization_results/optimization_mult_%s.csv" %(f,))
+        result_df.to_csv("./optimization_results/optimization_mult_%s_%s.csv" % (model, f,))
         result_df = pd.DataFrame(columns=columns)
         result = (0, None, None, None)
     

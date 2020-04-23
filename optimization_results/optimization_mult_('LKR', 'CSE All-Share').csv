@@ -1,1 +1,11 @@
 ,accuracy,args,target_market,feature_used
+0,0.5368421052631579,"{'kernel': 'linear', 'C': 0.5, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",IDR
+0,0.5407894736842105,"{'kernel': 'linear', 'C': 0.7, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",IDR
+0,0.5434210526315789,"{'kernel': 'linear', 'C': 1.0, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",IDR
+0,0.5565789473684211,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}","('LKR', 'CSE All-Share')",IDR
+0,0.55863539445629,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}","('LKR', 'CSE All-Share')","('MNT', 'MNE Top 20')"
+0,0.5605419136325148,"{'kernel': 'linear', 'C': 0.1, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",
+0,0.5647756138865369,"{'kernel': 'rbf', 'C': 0.9, 'gamma': 'scale'}","('LKR', 'CSE All-Share')",
+0,0.5657894736842105,"{'kernel': 'linear', 'C': 0.3, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",IDR
+0,0.5668924640135479,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}","('LKR', 'CSE All-Share')",
+0,0.56731583403895,"{'kernel': 'linear', 'C': 1.0, 'gamma': 'auto'}","('LKR', 'CSE All-Share')",

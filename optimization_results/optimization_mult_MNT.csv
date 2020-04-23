@@ -1,1 +1,5 @@
 ,accuracy,args,target_market,feature_used
+0,0.6582278481012658,"{'kernel': 'linear', 'C': 0.8, 'gamma': 'auto'}",MNT,
+0,0.6589950134253931,"{'kernel': 'rbf', 'C': 0.7, 'gamma': 'scale'}",MNT,
+0,0.6605293440736478,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}",MNT,
+0,0.6614331723027376,"{'kernel': 'rbf', 'C': 0.4, 'gamma': 'scale'}",MNT,"('NZD', 'NZX MidCap')"

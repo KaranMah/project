@@ -1,0 +1,11 @@
+,accuracy,args,target_market,feature_used
+0,0.5065472088215024,"{'kernel': 'linear', 'C': 0.4, 'gamma': 'auto'}","('PKR', 'Karachi 100')",
+0,0.5111821086261981,"{'kernel': 'linear', 'C': 0.6, 'gamma': 'auto'}","('PKR', 'Karachi 100')",INR
+0,0.5148173673328739,"{'kernel': 'rbf', 'C': 0.1, 'gamma': 'scale'}","('PKR', 'Karachi 100')",
+0,0.5223983459682977,"{'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}","('PKR', 'Karachi 100')",
+0,0.5239616613418531,"{'kernel': 'rbf', 'C': 0.6, 'gamma': 'scale'}","('PKR', 'Karachi 100')",INR
+0,0.5247603833865815,"{'kernel': 'rbf', 'C': 0.7, 'gamma': 'scale'}","('PKR', 'Karachi 100')",INR
+0,0.5327360441075121,"{'kernel': 'linear', 'C': 0.3, 'gamma': 'auto'}","('PKR', 'Karachi 100')",
+0,0.5341144038594073,"{'kernel': 'linear', 'C': 0.2, 'gamma': 'auto'}","('PKR', 'Karachi 100')","('JPY', 'NIkkei 225')"
+0,0.534803583735355,"{'kernel': 'linear', 'C': 0.4, 'gamma': 'auto'}","('PKR', 'Karachi 100')",
+0,0.5375603032391454,"{'kernel': 'linear', 'C': 0.1, 'gamma': 'auto'}","('PKR', 'Karachi 100')",
