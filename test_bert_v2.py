@@ -6,12 +6,13 @@ import ast
 import shutil
 
 BERT_DIR = "/home/fyp19020/BERT-fine-tuning-for-twitter-sentiment-analysis"
-BERT_DATA_DIR = f'{BERT_DIR}/data'
+BERT_DATA_DIR = f"{BERT_DIR}/data"
 BERT_MODEL = "MODEL NAME"
 
 csvPath = '/data/csv/'
 allFilesNames = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
-countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
+#countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
+countryList = ["Ulaanbaatar_since_2010-01-01_until_2019-12-31?2010.csv"]
 allFiles = [f for f in allFilesNames if any(j in f for j in countryList)]
 
 file_name = ""

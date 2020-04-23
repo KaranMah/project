@@ -20,7 +20,7 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 
 cls_models = [SVC]
 
-target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share')]
+target_markets = ['BDT', 'MNT', ('LKR', 'CSE All-Share')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -77,7 +77,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     prediction = pd.DataFrame(prediction)
 
     acc = accuracy_score(y_true, prediction)
-    print(confusion_matrix(y_test, prediction))
+    print(confusion_matrix(y_true, prediction))
     #print("accurcy for " + xstr(feat) + " with period " + str(period)+ " and params " + kwargs +"="+str(acc))
     return acc
 
@@ -163,13 +163,14 @@ def iterate_markets(model, f_m, feat, kwargs):
             if reg_res[0] < res:
                 reg_res = (res, kwargs, f_m, feat)
             print(reg_res)
+            with result_lock:
+                print(reg_res)
+                if result[0] < reg_res[0]:
+                    result = reg_res
+                    result_df = pd.concat([result_df, pd.DataFrame([reg_res], columns=columns)])
         except Exception as e:
-            pass
-    with result_lock:
-        print(reg_res)
-        if result[0] < reg_res[0]:
-            result = reg_res
-        result_df = pd.concat([result_df, pd.DataFrame([reg_res], columns=columns)])
+            print(e)
+    
 
 
 def main():
@@ -193,7 +194,7 @@ def main():
                     except Exception as e:
                         print("main, load ", e)
         print(len(threads))
-
+        print(f)
         for thread in threads:
             try:
                 thread.start()
