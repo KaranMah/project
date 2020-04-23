@@ -25,7 +25,7 @@ warnings.filterwarnings("ignore")
 forex = pd.read_csv('prep_forex.csv', header=[0,1], index_col=0)
 index = pd.read_csv('prep_index.csv', header=[0,1,2], index_col=0)
 
-curr = 'INR'
+curr = 'MNT'
 
 forex_pairs = list(set([x[1] for x in forex.columns if x[1] == curr]))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[1] == curr]))
@@ -50,10 +50,10 @@ cls_models = [RidgeClassifier, LogisticRegression, LogisticRegressionCV,
 scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
             PowerTransformer, FunctionTransformer]
 
-metric = 'Close'
+metric = 'Close_Ret'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric]
-features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['', '_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]
+features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]
 
 
 def multiple(x, y = 10):
@@ -61,10 +61,13 @@ def multiple(x, y = 10):
 
 def plot_results(y_true, y_pred, model):
     plot_df = pd.concat([y_true.reset_index(drop=True), pd.DataFrame(y_pred)], axis=1, ignore_index=True)
+    plot_df.index = y_true.index
+    plot_df.columns = ['y_true', 'y_pred']
     print(plot_df.tail(10))
     plt.figure()
     plt.plot(plot_df)
-    plt.title(model().__class__.__name__)
+    plt.legend(['y_true', 'y_pred'])
+    plt.title(model().__class__.__name__ + " MNT")
     plt.show()
 
 def run_sklearn_model(model, train, test, features, target):
@@ -121,12 +124,12 @@ def split_scale(X, y, scaler, shuffle=False):
         scaler_X = scaler_X.fit(X_train)
         X_train = scaler_X.transform(X_train)
         X_test = scaler_X.transform(X_test)
-        scaler_y = scaler()
-        if(scaler == scalers[-1]):
-            scaler_y = scaler(np.log1p)
-        scaler_y = scaler_y.fit(y_train.values.reshape(-1, 1))
-        y_train = scaler_y.transform(y_train.values.reshape(-1,1))
-        y_test = scaler_y.transform(y_test.values.reshape(-1,1))
+        # scaler_y = scaler()
+        # if(scaler == scalers[-1]):
+        #     scaler_y = scaler(np.log1p)
+        # scaler_y = scaler_y.fit(y_train.values.reshape(-1, 1))
+        # y_train = scaler_y.transform(y_train.values.reshape(-1,1))
+        # y_test = scaler_y.transform(y_test.values.reshape(-1,1))
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
         return(X_train, X_test, y_train, y_test)
@@ -136,9 +139,6 @@ def do_forex(cur, model, transf = None, shuffle=False):
     old_y = forex[[col for col in forex_cols if col[0] in target]][:-1]
     X = forex[[col for col in forex_cols if col[0] in features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
-    print(X)
-    print(old_y, y)
-    lol
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     if(model in reg_models):
@@ -220,5 +220,5 @@ def get_cors_index(cur, model, transf = None, shuffle=False):
 # get_cors_index(index_pairs[0], LinearRegression, StandardScaler)
 # print(forex_pairs)
 # do_forex_index(forex_pairs[0], LinearRegression, None)
-do_forex(forex_pairs[0], RandomForestRegressor, None)
+do_forex_index('BDT', LinearRegression)
 # print(forex.columns[:18])

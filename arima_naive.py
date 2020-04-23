@@ -1,4 +1,4 @@
-#%matplotlib inline
+%matplotlib inline
 
 import json
 import math
@@ -42,11 +42,12 @@ def run_auto_arima_model(train, test, features, target, is_exog, y_dates):
     X_test, y_test = test
     if(not is_exog):
         X_train = None
+        X_test = None
     model = pm.auto_arima(y_train, start_p=1, start_q=1,
                       exogenous=X_train,
                       test='adf',       # use adftest to find optimal 'd'
                       max_p=3, max_q=3, # maximum p and q
-                      m=5,              # frequency of series
+                      m=10,              # frequency of series
                       d=None,           # let model determine 'd'
                       seasonal=True,    # No Seasonality
                       start_P=1,
@@ -61,8 +62,8 @@ def run_auto_arima_model(train, test, features, target, is_exog, y_dates):
     res['AIC'] = model.aicc()
     res['BIC'] = model.bic()
     print(model.summary())
-    #model.plot_diagnostics(figsize=(7,5))
-    #plt.show()
+    model.plot_diagnostics(figsize=(7,5))
+    plt.show()
     n_periods = len(y_test)
     fc, confint = model.predict(n_periods=n_periods,
                                 exogenous=X_test,
@@ -73,17 +74,17 @@ def run_auto_arima_model(train, test, features, target, is_exog, y_dates):
     res['R2'] = r2_score(y_test, fc)
     lower_series = pd.Series(confint[:, 0], index=index_of_fc)
     upper_series = pd.Series(confint[:, 1], index=index_of_fc)
-    #plt.plot(y_train)
-    #plt.plot(fc_series, color='darkgreen')
-    #plt.plot(y_test, color='red')
-    #plt.fill_between(lower_series.index,
+    # plt.plot(y_train)
+    plt.plot(fc_series, color='darkgreen')
+    plt.plot(y_test, color='red')
+    # plt.fill_between(lower_series.index,
     #                 lower_series,
     #                 upper_series,
     #                 color='k', alpha=.15)
-    #plt.title("Final Forecast")
-    #plt.show()
+    plt.title("Final Forecast")
+    plt.show()
     # y_pred = reg.predict(X_test)
-    # plot_results(pd.DataFrame(y_test), pd.DataFrame(y_pred), model)
+    # plot_results(pd.DataFrame(y_test), pd.DataFrame(fc_series), model)
     return(res, fc)
 
 
@@ -125,7 +126,7 @@ def check_bins(real, pred):
         "Precision": precision_score(y_test, y_pred, average='weighted'),
         "Recall": recall_score(y_test, y_pred, average='weighted')})
 
-def save_to_csv(real, pred, y_dates):
+def save_to_csv(real, pred, y_dates, names):
     save_data = pd.DataFrame(columns = ['y_true_class', 'y_pred_class', 'y_true_reg', 'y_pred_reg'], index = y_dates)
     try:
         save_data['y_true_reg'] = real
@@ -138,7 +139,7 @@ def save_to_csv(real, pred, y_dates):
     else:
         save_data['y_true_class'] = np.sign(save_data['y_true_reg'].pct_change())
         save_data['y_pred_class'] = np.sign(save_data['y_pred_reg'].pct_change())
-    save_data.to_csv(real.columns[0][1]+"_"+real.columns[0][0]+"_Arima_log.csv")
+    save_data.to_csv(names[0][1]+"_"+names[0][0]+"_Arima.csv")
 
 def do_forex_arima(cur, target, is_exog=False, transf = None):
     forex_cols = [x for x in forex.columns if x[1] == cur]
@@ -146,7 +147,7 @@ def do_forex_arima(cur, target, is_exog=False, transf = None):
     y = forex[[col for col in forex_cols if col[0] == metric]].shift(-1)[:-1]
     X_train, X_test, y_train, y_test, y_dates = split_scale(X, y, transf)
     res, y_pred = run_auto_arima_model((X_train, y_train), (X_test, y_test), features, target, is_exog, y_dates)
-    save_to_csv(y_test, y_pred, y_dates)
+    save_to_csv(y_test, y_pred, y_dates, y.columns)
     metrics = check_bins(y_test, y_pred)
     res.update(metrics)
     return(res)
@@ -194,5 +195,5 @@ def iterate_markets():
 # res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
 # # print(res_df)
 # res_df.to_csv("naive_arima.csv")
-res = do_forex_arima(cur, metric, True, FunctionTransformer)
+res = do_forex_arima(cur, metric, False, None)
 print(res)
