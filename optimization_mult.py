@@ -30,6 +30,12 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
 kernel = ['linear', 'rbf']
 C = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0]
 gamma = ['auto', 'scale']
+alpha = [0.001,0.01,0.1,1.0,10.0]
+fit_intercept = [True, False]
+normalize = [True, False]
+tol = [1e-5,1e-4,1e-3,1e-2,1e-1]
+solver = ['auto','sag']
+random_state = [1,2,3,4,5,6,7,8,9,10]
 
 result = (0, None, None, None)
 result_lock = Lock()
@@ -178,39 +184,45 @@ def main():
     numTot = len(cls_models) * len(target_markets) * len(features[target_markets[0]])
     global result_df
     global result
-    params = []
-    for k in kernel:
-        for c in C:
-            for g in gamma:
-                params.append({'kernel': k, 'C': c, 'gamma': g})
 
-    print(len(params))
-    threads = []
+    pool = []
     for f in target_markets:
         for model_name in cls_models:
             for feature in features[f]:
-                for ind, p in enumerate(params):
+                if model_name.__name__ == "SVC":
+                    params = [{'kernel': k, 'C': c, 'gamma': g, 'tol':t}
+                              for k in kernel for c in C for g in gamma for t in tol]
+                    for ind, p in enumerate(params):
+                        try:
+                            pool.append(Thread(target=iterate_markets, args=(model_name, f, feature, p)))
+                        except Exception as e:
+                            print("main, load ", e)
+                else:
+                    params = [{'alpha': a, 'fit_intercept': fit, 'normalize': n, 'tol': t,
+                               'solver': s, 'random_state': r}
+                              for a in alpha for fit in fit_intercept for n in normalize
+                              for t in tol for s in solver for r in random_state]
                     try:
-                        threads.append(Thread(target=iterate_markets, args=(model_name, f, feature, p)))
+                        pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
-                        print("main, load ", e)
-        print(len(threads))
-        print(f)
-        for thread in threads:
-            try:
-                thread.start()
-            except Exception as e:
-                print("main, start ", e)
+                        print("main load", e)
+            print(len(pool))
+            print(f, model_name.__name__)
+            for thread in pool:
+                try:
+                    thread.start()
+                except Exception as e:
+                    print("main, start ", e)
 
-        for thread in threads:
-            thread.join()
+            for thread in pool:
+                thread.join()
 
-        threads = []
+            pool = []
 
-        print("best score %s=%s" % (f, result,))
-        result_df.to_csv("./optimization_results/optimization_mult_%s_%s.csv" % (model, f,))
-        result_df = pd.DataFrame(columns=columns)
-        result = (0, None, None, None)
+            print("best score %s=%s" % (f, result,))
+            result_df.to_csv("./optimization_results/optimization_mult_%s_%s.csv" % (model_name.__name__, f,))
+            result_df = pd.DataFrame(columns=columns)
+            result = (0, None, None, None)
     
 main()
 
