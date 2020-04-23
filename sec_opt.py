@@ -23,8 +23,8 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 
 cls_models = [SVC]
 
-#target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share')]
-target_markets = ['BDT']
+target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share')]
+#target_markets = ['BDT']
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -62,6 +62,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     prediction = reg.predict(X_test)
     prediction = pd.DataFrame(prediction)
     acc = accuracy_score(y_test, prediction)
+    #print(confusion_matrix(y_test, prediction))
     return acc
 
 
@@ -155,6 +156,7 @@ def iterate_markets(model, f_m, feat, kwargs):
 def main():
     params = []
     global result_df
+    global result
     for k in kernel:
         for c in C:
             for g in gamma:
@@ -183,9 +185,10 @@ def main():
 
         threads = []
 
-        print("best score " + f + " =", result)
-        result_df.to_csv("./optimization_results/sec_opt_"+f+".csv")
+        print("best score %s=%s" % (f, result))
+        result_df.to_csv("./optimization_results/sec_opt_%s.csv" % (f,))
         result_df = pd.DataFrame(columns=columns)
+        result = (0, None,None, None)
 main()
 
 

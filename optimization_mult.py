@@ -77,6 +77,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     prediction = pd.DataFrame(prediction)
 
     acc = accuracy_score(y_true, prediction)
+    print(confusion_matrix(y_test, prediction))
     #print("accurcy for " + xstr(feat) + " with period " + str(period)+ " and params " + kwargs +"="+str(acc))
     return acc
 
@@ -161,10 +162,11 @@ def iterate_markets(model, f_m, feat, kwargs):
 
             if reg_res[0] < res:
                 reg_res = (res, kwargs, f_m, feat)
-
+            print(reg_res)
         except Exception as e:
             pass
     with result_lock:
+        print(reg_res)
         if result[0] < reg_res[0]:
             result = reg_res
         result_df = pd.concat([result_df, pd.DataFrame([reg_res], columns=columns)])
@@ -173,8 +175,8 @@ def iterate_markets(model, f_m, feat, kwargs):
 def main():
     numTot = len(cls_models) * len(target_markets) * len(features[target_markets[0]])
     global result_df
+    global result
     params = []
-    result = (0,None, None, None)
     for k in kernel:
         for c in C:
             for g in gamma:
@@ -203,9 +205,10 @@ def main():
 
         threads = []
 
-        print("best score "+f+" =", result)
-        result_df.to_csv("./optimization_results/optimization_mult_"+f+".csv")
+        print("best score %s=%s" % (f, result,))
+        result_df.to_csv("./optimization_results/optimization_mult_%s.csv" %(f,))
         result_df = pd.DataFrame(columns=columns)
+        result = (0, None, None, None)
     
 main()
 
