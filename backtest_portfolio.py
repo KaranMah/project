@@ -132,9 +132,12 @@ if __name__ == "__main__":
         # Obtain the bars for all data
         for symbol in target:
             bars = DataReader(symbol, start_test, end_period, symbol_class)
-            for feat in features[symbol]:
+            for feat in features[symbol][::-1]:
                 data = DataReader(symbol, start_test, end_period, model=model, pred_results=True, is_ret=is_ret,
                                      feat=feat)
+                print(feat)
+                print(data)
+                chomu
                 for col in data.columns:
                     print("%s %s %s"% (symbol, col,feat))
                     signals['signal'] = data[col]
