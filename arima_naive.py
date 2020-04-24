@@ -26,7 +26,7 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler, Normalizer,
            QuantileTransformer, PowerTransformer, FunctionTransformer]
 
-metric = 'Close_Ret'
+metric = 'Close'
 metrics = ['Open', 'Close', 'Low', 'High', 'Volume']
 # target = [metric]
 features = ['Intraday_OC', 'Prev_close_open'] + [y+x for x in ['_Ret', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]

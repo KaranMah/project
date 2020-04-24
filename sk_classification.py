@@ -69,7 +69,7 @@ def run_sklearn_model(model, train, test, features, target):
         X_test, y_test = test
     except:
         pass
-    reg = model(n_estimators=1000)#kernel='poly', degree=5)#penalty='elasticnet')#solver='liblinear', max_iter=1000)#, tol=1e-3)
+    reg = model()#kernel='poly', degree=5)#penalty='elasticnet')#solver='liblinear', max_iter=1000)#, tol=1e-3)
     print(X_train)
     print(y_train)
     reg.fit(X_train, y_train)
@@ -95,7 +95,8 @@ def run_sklearn_model(model, train, test, features, target):
     except:
         return({"F1" :f1_score(y_test, y_pred, average='weighted'),
             "Precision": precision_score(y_test, y_pred, average='weighted'),
-            "Recall": recall_score(y_test, y_pred, average='weighted')})
+            "Recall": recall_score(y_test, y_pred, average='weighted'),
+            "Accuracy": accuracy_score(y_test, y_pred)})
     #     y_pred = ([x[0] for x in y_pred])
     #     for i in range(len(y_pred)):
     #         if(np.isnan(y_pred[i])):
@@ -114,15 +115,7 @@ def split_scale(X, y, scaler, shuffle=False, poly=False, transf_features_also=Fa
         X_train = PolynomialFeatures(2).fit_transform(X_train)
         X_test = PolynomialFeatures(2).fit_transform(X_test)
     if (scaler == scalers[-1]):
-        scaler_X = scaler(n_bins=n_bins, encode='ordinal', strategy='uniform')
-    else:
-        scaler_X = scaler()
-    scaler_X = scaler_X.fit(X_train)
-    if(transf_features_also):
-        X_train = scaler_X.transform(X_train)
-        X_test = scaler_X.transform(X_test)
-    if (scaler == scalers[-1]):
-        scaler_y = scaler(n_bins=n_bins, encode='ordinal', strategy='uniform')
+        scaler_y = scaler(n_bins=n_bins, encode='ordinal', strategy='quantile')
     else:
         scaler_y = scaler()
     scaler_y = scaler_y.fit(y_train)
@@ -185,7 +178,7 @@ def iterate_markets():
 # print(res_df)
 # res_df.to_csv("sk_classification.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
-# cur = 'BDT'
-# mod = LogisticRegression
-# do_forex(cur, mod, Binarizer, False, False, False)
-do_index(('PKR', 'Karachi 100'), RandomForestClassifier, Binarizer, False, False, False)
+cur = 'BDT'
+mod = RandomForestClassifier
+do_forex(cur, mod, KBinsDiscretizer, False, False, False)
+# do_index(('PKR', 'Karachi 100'), RandomForestClassifier, Binarizer, False, False, False)
