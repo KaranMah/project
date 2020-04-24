@@ -20,7 +20,7 @@ index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close'])
 
 cls_models = [RidgeClassifier]
 
-target_markets = ['BDT', 'MNT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
+target_markets = ['MNT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
@@ -28,16 +28,16 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             "BDT": [("IDR", "IDX Composite"), None, "VND"]}
 
 kernel = ['linear', 'rbf']
-C = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0]
+C = [0.001,.01,.05,.1,.5,1.0]
 gamma = ['auto', 'scale']
-alpha = [0.001,0.01,0.1,1.0,10.0]
+alpha = [0.01,0.1,1.0,10.0]
 fit_intercept = [True, False]
 normalize = [True, False]
-tol = [1e-5,1e-4,1e-3,1e-2,1e-1]
+tol = [1e-5,1e-4,1e-3,1e-2]
 solver = ['auto','sag']
-random_state = [1,2,3,4,5,6,7,8,9,10]
+random_state = [2,3,4,5]
 
-result = (0, None, None, None)
+result = (0, None, None, None, None)
 result_lock = Lock()
 columns=['accuracy', 'args', 'target_market', 'feature_used']
 result_df = pd.DataFrame(columns=columns)
@@ -67,6 +67,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     data = X_train.values
     data_y = y_train
     for i, t in enumerate(X_test.values):
+        #print(X_test.iloc[i,:])
         reg = model(**kwargs)
         reg.fit(data, data_y)
         if i == 0:
@@ -74,7 +75,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
             for elem in y:
                 prediction.append(elem)
 
-        y = reg.predict([t])
+        y = reg.predict(X_test.iloc[i,:].values.reshape(1,-1))
         prediction.append(y[0])
         data = np.vstack((data, t))
         data = np.delete(data, 0, 0)
@@ -84,7 +85,7 @@ def run_sklearn_model(model, train, test, feat, kwargs):
     prediction = pd.DataFrame(prediction)
 
     acc = accuracy_score(y_true, prediction)
-    print(confusion_matrix(y_true, prediction))
+    #print(confusion_matrix(y_true, prediction))
     #print("accurcy for " + xstr(feat) + " with period " + str(period)+ " and params " + kwargs +"="+str(acc))
     return acc
 
@@ -168,7 +169,7 @@ def iterate_markets(model, f_m, feat, kwargs):
                 res = do_index(f_m, model, train_index, test_index, feat, None, kwargs)
 
             if reg_res[0] < res:
-                reg_res = (res, kwargs, f_m, feat)
+                reg_res = (res, kwargs, f_m, feat, i)
             #print(reg_res)
             with result_lock:
                 #print(reg_res)
@@ -206,13 +207,13 @@ def main():
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
                         print("main load", e)
-            print(len(pool))
+            #print(len(pool))
             print(f, model_name.__name__)
             for thread in pool:
-                try:
-                    thread.start()
-                except Exception as e:
-                    print("main, start ", e)
+                #try:
+                thread.start()
+                #except Exception as e:
+                #    print("main, start ", e)
 
             for thread in pool:
                 thread.join()

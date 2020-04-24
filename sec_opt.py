@@ -21,7 +21,7 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [RidgeClassifier]
+cls_models = [SVC]
 
 target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
@@ -149,7 +149,6 @@ def iterate_markets(model, f_m, feat, kwargs):
             reg_res = (res, kwargs, f_m, feat)
 
     except Exception as e:
-        print(e)
         pass
     with result_lock:
         if result[0] < reg_res[0]:
@@ -183,8 +182,8 @@ def main():
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
                         print("main load", e)
-            print(len(pool))
-            print(f)
+            #print(len(pool))
+            print(f, model_name.__name__)
             for thread in pool:
                 try:
                     thread.start()
