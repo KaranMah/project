@@ -97,8 +97,9 @@ AGGREGATE_PATH = "/data/aggregate/"
 hashtags = []
 
 #countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
-countryList = ["#HoChi"]
+countryList = ["#Dhaka"]
 allFiles = [f for f in listdir(RESULTS_PATH) if (isfile(join(RESULTS_PATH, f)) and any(j in f for j in countryList))]
+allFiles.sort()
 
 for file_name in allFiles:
     print(file_name)

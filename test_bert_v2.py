@@ -12,8 +12,10 @@ BERT_MODEL = "MODEL NAME"
 csvPath = '/data/csv/'
 allFilesNames = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
 #countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
-countryList = ["#Colombo"]
+countryList = ["#Dhaka"]
 allFiles = [f for f in allFilesNames if any(j in f for j in countryList)]
+print(allFiles)
+allFiles.sort()
 
 file_name = ""
 # get first item that isn't processed
