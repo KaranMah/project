@@ -2,7 +2,20 @@ import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import RidgeClassifier
+from sklearn.svm import SVC
+
 from backtest import Strategy, Portfolio
+
+csv_dir = "./walk_forward_opt/mode/"
+market = ["forex", "index"]
+target_markets = {"forex": [ 'MNT', 'BDT'],
+                  "index": [('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]}
+features = {"MNT": [None, "LKR",("NZD", "NZX MidCap")],
+            ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
+            ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
+            "BDT": [None, ("IDR", "IDX Composite"), "VND"]}
+xstr = lambda s: '' if s is None else str(s)
 
 class SNPForecastingStrategy(Strategy):
     """
@@ -21,14 +34,6 @@ class SNPForecastingStrategy(Strategy):
         """Returns the DataFrame of symbols containing the signals
         to go long, short or hold (1, -1 or 0)."""
         signals = self.prelim_signals
-        # volatility = self.bars['Close'].rolling(self.w).std(ddof=0)
-        # signals['Volatiity'] = volatility
-        # vals = np.array(self.bars['Close'])
-        # vals = (vals - np.mean(vals))/np.std(vals)
-        # signals['z_score'] = vals
-        # dup = signals.pivot_table(index=['signal'], aggfunc='size')
-        # signals[abs(signals['z_score']) > 2] = 0
-        # dup = signals.pivot_table(index=['signal'], aggfunc='size')
         return signals
 
 class MarketIntradayPortfolio(Portfolio):
@@ -75,31 +80,24 @@ class MarketIntradayPortfolio(Portfolio):
         portfolio['price_diff'] = self.bars['Close'] - self.bars['Open']
         portfolio['price_diff'][0:5] = 0.0
         portfolio['profit'] = self.positions[self.symbol] * (portfolio['price_diff'])
-        portfolio['fees'] = 500*(bars['Close']*0.002 + bars['Open']*0.002)* abs(portfolio['price_diff'])
+        # portfolio['fees'] = 500*(bars['Close']*0.002 + bars['Open']*0.002)* abs(portfolio['price_diff'])
+        portfolio['fees'] = 500 * 0.002 * abs(portfolio['price_diff'])
         # Generate the equity curve and percentage returns
         portfolio['total'] = self.initial_capital + portfolio['profit'].cumsum() - portfolio['fees'].cumsum()
         portfolio['returns'] = portfolio['total'].pct_change()
         return portfolio
 
 
-def DataReader(symbol, start_date, end_date, symbol_class="forex" , model="SVC", pred_results=False, is_ret=False):
+def DataReader(symbol, start_date, end_date, symbol_class="forex", model=SVC,
+               pred_results=False, is_ret=False, feat=None):
     if pred_results:
-        if model == "SVC" or model == "RidgeClassifier":
-            csv = symbol+"_"+model+"_sliding_30_results.csv"
-            data = pd.read_csv(csv)
-            data = data.set_index('Date')
-            print(data)
-        else:
-            if is_ret:
-                csv = symbol + "_Close_Ret_" + model + ".csv"
-            else:
-                csv = symbol+"_Close_" + model + ".csv"
-            data = pd.read_csv(csv)
-            data = data[['Date', 'y_pred_class']]
-            data = data.set_index('Date')
+        csv_name = csv_dir + str(symbol) + "_" + model.__name__ + "_final_" + xstr(feat)+".csv"
+        data = pd.read_csv(csv_name)
+        data = data.set_index('Date')
     else:
         csv = "prep_" + symbol_class + ".csv"
         if symbol_class == "forex":
+            print(symbol, symbol_class)
             data = pd.read_csv(csv, header=[0, 1], index_col=0)
             forex_features_bt = ["Open", "Close", "High", "Low", "Volume"]
             forex_cols_bt = [x for x in data.columns if x[1] == symbol]
@@ -107,7 +105,13 @@ def DataReader(symbol, start_date, end_date, symbol_class="forex" , model="SVC",
             data.columns = [x[0] for x in list(data.columns)]
             data = data.dropna(how='any')
         else:
+            (print(symbol, symbol_class))
             data = pd.read_csv(csv, header=[0, 1, 2], index_col=0)
+            index_features_bt = ["Open", "Close", "High", "Low", "Volume"]
+            index_cols_bt = [x for x in data.columns if x[1] == symbol[0] and x[2] == symbol[1]]
+            data = data[[col for col in index_cols_bt if col[0] in index_features_bt]][:-1]
+            data.columns = [x[0] for x in list(data.columns)]
+            data = data.dropna(how='any')
 
     data.index = pd.to_datetime(data.index)
     mask = (data.index > start_date) & (data.index <= end_date)
@@ -119,38 +123,44 @@ if __name__ == "__main__":
     start_test = datetime.datetime(2018, 1, 1)
     end_period = datetime.datetime(2019, 12, 30)
 
-    symbol = "BDT" #input()
-    symbol_class = "forex"
-    model = "RidgeClassifier" #input()
+    model = SVC
     is_ret = False
     w = 5
-    # Obtain the bars for SPY ETF which tracks the S&P500 index
-    bars = DataReader(symbol, start_test, end_period, symbol_class)
-    # Create the S&P500 forecasting strategy
-    signals = DataReader(symbol, start_test, end_period, model=model, pred_results=True, is_ret=is_ret)
-    signals.columns = ["signal"]
-    strategy = SNPForecastingStrategy(symbol, bars, signals, w)
+    signals = pd.DataFrame(columns=['signal'])
+    for symbol_class in market:
+        target = target_markets[symbol_class]
+        # Obtain the bars for all data
+        for symbol in target:
+            bars = DataReader(symbol, start_test, end_period, symbol_class)
+            for feat in features[symbol]:
+                data = DataReader(symbol, start_test, end_period, model=model, pred_results=True, is_ret=is_ret,
+                                     feat=feat)
+                for col in data.columns:
+                    print("%s %s %s"% (symbol, col,feat))
+                    signals['signal'] = data[col]
+                    strategy = SNPForecastingStrategy(symbol, bars, signals, w)
+                    # Create the portfolio based on the forecaster
+                    portfolio = MarketIntradayPortfolio(symbol, bars, signals,
+                                                        initial_capital=100000.0)
+                    returns = portfolio.backtest_portfolio()
+                    #print(returns.iloc[-1])
+                    # Plot results
+                    fig = plt.figure()
+                    fig.patch.set_facecolor('white')
+                    fig.suptitle(' %s %s final opt %s' % (symbol, model.__name__, col))
 
-    signals = strategy.generate_signals()
+                    # Plot the price of the SPY ETF
+                    ax1 = fig.add_subplot(211, ylabel=''.join(symbol) + 'price in $')
+                    bars['Close'].plot(ax=ax1, color='r', lw=2.)
 
-    # Create the portfolio based on the forecaster
-    portfolio = MarketIntradayPortfolio(symbol, bars, signals,
-                                        initial_capital=100000.0)
-    returns = portfolio.backtest_portfolio()
-    print(returns)
-    # Plot results
-    fig = plt.figure()
-    fig.patch.set_facecolor('white')
+                    # Plot the equity curve
+                    ax2 = fig.add_subplot(212, ylabel='Portfolio value in $')
+                    returns['total'].plot(ax=ax2, lw=2.)
+                    #plt.show()
+                    fig.savefig("./images/mode/%s_%s_%s.png"% (symbol,model.__name__,col))
+                    plt.close()
 
-    # Plot the price of the SPY ETF
-    ax1 = fig.add_subplot(211, ylabel=symbol+'ETF price in $')
-    bars['Close'].plot(ax=ax1, color='r', lw=2.)
-
-    # Plot the equity curve
-    ax2 = fig.add_subplot(212, ylabel='Portfolio value in $')
-    returns['total'].plot(ax=ax2, lw=2.)
-
-    # if is_ret:
-    #     fig.savefig("./images/" + symbol + "_" + model + "_ret_res.png")
-    # else:
-    #     fig.savefig("./images/"+symbol + "_" + model + "_with_brok_res.png")
+    # # if is_ret:
+    # #     fig.savefig("./images/" + symbol + "_" + model + "_ret_res.png")
+    # # else:
+    # #     fig.savefig("./images/"+symbol + "_" + model + "_with_brok_res.png")
