@@ -212,4 +212,3 @@ def iterate_markets():
                     final.to_csv(csv_name+".csv")
 
 iterate_markets()
-

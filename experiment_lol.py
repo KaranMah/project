@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 
 %matplotlib inline
 
+from sklearn.decomposition import PCA
 from sklearn.linear_model import *
 from sklearn.preprocessing import *
 from sklearn.model_selection import train_test_split
@@ -52,7 +53,7 @@ cls_models = [RidgeClassifier, LogisticRegression, LogisticRegressionCV,
 scalers = [None, MinMaxScaler, MaxAbsScaler, StandardScaler, RobustScaler,
             PowerTransformer, FunctionTransformer]
 
-metric = 'Close'
+metric = 'Close_Ret'
 metrics = ['Open', 'Close', 'Low', 'High']
 target = [metric]
 features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y+x for x in ['', '_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45', '_MTD', '_YTD'] for y in metrics]# if (x+y) not in target]
@@ -104,6 +105,19 @@ def run_sklearn_model(model, train, test, features, target):
     # print("MSE: ", mean_squared_error(y_test, y_pred))
     # print("R2: ", r2_score(y_test, y_pred))
 
+def do_pca(train, test, names, n=None):
+    pca = PCA(n).fit(train)
+    plt.plot(np.cumsum(pca.explained_variance_ratio_))
+    plt.xlabel('Number of components')
+    plt.ylabel('Cumulative explained variance')
+    plt.show()
+    res = (dict(zip(names, pca.explained_variance_ratio_)))
+    sorted_res = (sorted(res.items(), key=lambda x: x[1], reverse=True))
+    print(sorted_res)
+    X_train = (pca.transform(train))
+    X_test = (pca.transform(test))
+    return(X_train, X_test)
+
 def bins_scale(X, y, scaler, shuffle=False):
     X_train, X_test, y_train, y_test = train_test_split(X, y, shuffle=shuffle, test_size=0.2)
     X_train = Binarizer().fit_transform(X_train)
@@ -147,7 +161,8 @@ def do_forex(cur, model, transf = None, shuffle=False):
         X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle)
     else:
         X_train, X_test, y_train, y_test = bins_scale(X, y, transf, shuffle)
-    res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), features, target)
+    X_train_pca, X_test_pca = do_pca(X_train, X_test, X.columns, 5)
+    res = run_sklearn_model(model, (X_train_pca, y_train), (X_test_pca, y_test), features, target)
     return(res)
 
 def do_index(cur, model, transf = None, shuffle=False):
