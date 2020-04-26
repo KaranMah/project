@@ -47,6 +47,14 @@ index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y + x for 
                                                                       ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45',
                                                                        '_MTD', '_YTD'] for y in (metrics)]
 
+param_set = {"('PKR', 'Karachi 100')":{'alpha': 0.01, 'fit_intercept': True, 'normalize': False,
+                                       'tol': 0.001, 'solver': 'sag', 'random_state': 1},
+             "BDT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
+                          'solver': 'sag', 'random_state': 4},
+             "MNT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
+                          'solver': 'sag', 'random_state': 4},
+             "('LKR', 'CSE All-Share')":{'alpha': 0.001, 'fit_intercept': False, 'normalize': True,
+                                         'tol': 0.0001, 'solver': 'auto', 'random_state': 1}}
 # scalers = [None, MinMaxScaler, StandardScaler]
 xstr = lambda s: 'None' if s is None else str(s)
 
@@ -187,21 +195,6 @@ def do_index(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     return (res)
 
 
-def do_pca(train, test, names, n=None):
-    pca = PCA(n).fit(train)
-    plt.plot(np.cumsum(pca.explained_variance_ratio_))
-    plt.xlabel('Number of components')
-    plt.ylabel('Cumulative explained variance with sentiment')
-    plt.show()
-    # plt.close()
-    res = (dict(zip(names, pca.explained_variance_ratio_)))
-    sorted_res = (sorted(res.items(), key=lambda x: x[1], reverse=True))
-    print(sorted_res)
-    X_train = (pca.transform(train))
-    X_test = (pca.transform(test))
-    return X_train, X_test
-
-
 def iterate_markets():
     shuffle = False
     poly = False
@@ -215,16 +208,13 @@ def iterate_markets():
                 kwargs = {'kernel': 'rbf', 'C': 1.0, 'gamma': 'scale'}
                 # feat = None
             elif model == RidgeClassifier:
-                kwargs = {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
-                          'solver': 'sag', 'random_state': 4}
+                kwargs = param_set[f_m]
                 # feat = 'VND'
             else:
                 kwargs = {}
             for scaler in [None]:
                 for feat in features[f_m]:
-                    # print(feat)
                     res = {}
-                    # reg_res = []
                     rows = []
                     for i in range(30, 51, 5):
                         # try:
@@ -238,23 +228,7 @@ def iterate_markets():
                             test_index = 0
                             res[str(i)] = do_index(f_m, model, train_index, test_index, feat, scaler, shuffle, poly,
                                                    kwargs)
-                        # if isinstance(feat, tuple):
-                        #     res.columns = [feat[0] + "_pred_" + str(i)]
-                        # else:
-                        #     res.columns = [xstr(feat) + "_pred_" + str(i)]
-
-                        # reg_res = pd.concat([reg_res, res], axis=1)
-                        # print(reg_res.shape)
-                        # rows.append(i)
-                    # except Exception as e:
-                    #     print(e)
-                    #     pass
                     reg_res = reg_res + [res]
-                    # csv_name = csv_dir + str(f_m) + "_" + model.__name__ + "_sentiment_" + xstr(feat)
-                    # final = reg_res.mode(axis=1)
-                    # final.columns = ['pred_mode']
-                    # print(final.head())
-                    # reg_res.to_csv(csv_name+".csv")
     df = pd.DataFrame().append(reg_res)
     print(df)
     df.to_csv("%s_%s_window_accuracies.csv" % (csv_dir, cls_models[0].__name__))
