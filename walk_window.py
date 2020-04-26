@@ -18,15 +18,15 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [SVC, RidgeClassifier]
+cls_models = [RidgeClassifier]
 reg_models = [SVR]
 n_bins = 4
 
-target_markets = ['MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
+target_markets = ['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
-            "BDT": [None, ("IDR", "IDX Composite"), "VND"]}
+            "BDT": [None, "VND", ("IDR", "IDX Composite")]}
 
 window = {"MNT": 40,
 
@@ -79,7 +79,7 @@ def run_sklearn_model(model, train, test, feat, target, kwargs):
         data_y = np.delete(data_y, 0, 0)
     y_true = np.vstack((y_train, y_test))
     prediction = pd.DataFrame(prediction)
-    print(y_true, prediction)
+
     acc = accuracy_score(y_true, prediction)
     print(model.__name__ + " accurcy for " + xstr(feat) + " with period " + str(period) + "=" + str(acc))
     x_true = pd.concat([X_train, X_test], axis=0)
@@ -172,7 +172,7 @@ def iterate_markets():
             for scaler in [None]:
                 reg_res = pd.DataFrame()
                 for feat in features[f_m]:
-                    print(feat)
+
                     rows = []
                     i = window[f_m]
                     if (f_m in forex_pairs):
@@ -191,8 +191,9 @@ def iterate_markets():
                     reg_res = pd.concat([reg_res, res], axis=1)
                     rows.append(i)
 
-            csv_name = csv_dir + str(f_m) + "_final_" + window[f_m]
+            csv_name = csv_dir + str(f_m) + "_final_" + str(window[f_m])
             final = reg_res.mode(axis=1)
+            print(final)
             final.columns = ['pred_mode']
             reg_res.to_csv(csv_name + ".csv")
 

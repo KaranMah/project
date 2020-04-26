@@ -26,8 +26,7 @@ target_markets =['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
-            "BDT": [None, ("IDR", "IDX Composite"), "VND"]}
-
+            "BDT": [None, "VND", ("IDR", "IDX Composite")]}
 accuracy_lst = pd.DataFrame()
 csv_name = ""
 csv_dir = "./walk_forward_opt/final/"
@@ -188,8 +187,6 @@ def iterate_markets():
                 reg_res = pd.DataFrame()
                 rows = []
                 for feat in features[f_m]:
-                    print(feat)
-
                     for i in range(30, 55, 5):
                         # try:
                             if (f_m in forex_pairs):
@@ -206,7 +203,7 @@ def iterate_markets():
                                 res.columns = [xstr(feat) + "_pred_" + str(i)]
 
                             reg_res = pd.concat([reg_res, res], axis=1)
-                            print(reg_res.shape)
+
                             rows.append(i)
                 print(reg_res)
                 csv_name = csv_dir + str(f_m) + "_final"

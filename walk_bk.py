@@ -27,7 +27,7 @@ target_markets = ['BDT' ,'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
-            "BDT": [None, ("IDR", "IDX Composite"), "VND"]}
+            "BDT": [None, "VND", ("IDR", "IDX Composite")]}
 
 # forex_feature = "VND"
 # index_feature = ("BDT", "DSE 30")
@@ -47,13 +47,13 @@ index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y + x for 
                                                                       ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45',
                                                                        '_MTD', '_YTD'] for y in (metrics)]
 
-param_set = {"('PKR', 'Karachi 100')":{'alpha': 0.01, 'fit_intercept': True, 'normalize': False,
+param_set = {('PKR', 'Karachi 100'):{'alpha': 0.01, 'fit_intercept': True, 'normalize': False,
                                        'tol': 0.001, 'solver': 'sag', 'random_state': 1},
              "BDT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
                           'solver': 'sag', 'random_state': 4},
              "MNT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
                           'solver': 'sag', 'random_state': 4},
-             "('LKR', 'CSE All-Share')":{'alpha': 0.001, 'fit_intercept': False, 'normalize': True,
+             ('LKR', 'CSE All-Share'):{'alpha': 0.001, 'fit_intercept': False, 'normalize': True,
                                          'tol': 0.0001, 'solver': 'auto', 'random_state': 1}}
 # scalers = [None, MinMaxScaler, StandardScaler]
 xstr = lambda s: 'None' if s is None else str(s)
