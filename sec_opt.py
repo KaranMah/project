@@ -21,7 +21,7 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [SVC]
+cls_models = [RidgeClassifier]
 
 target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
@@ -33,10 +33,10 @@ kernel = ['linear', 'rbf']
 C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
 gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
 
-alpha = [0.001,0.01,0.1,1.0,10.0]
-fit_intercept = [True, False]
+alpha = list(np.arange(0.001, 1.001, 0.002))
+fit_intercept = [False]
 normalize = [True, False]
-tol = [1e-5,1e-4,1e-3,1e-2,1e-1]
+tol = list(np.arange(0.0001, 0.1, 0.0002))
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
@@ -175,9 +175,9 @@ def main():
                             print("main, load ", e)
                 else:
                     params = [{'alpha': a, 'fit_intercept': fit, 'normalize': n, 'tol': t,
-                               'solver': s, 'random_state': r}
+                               'solver': s}
                               for a in alpha for fit in fit_intercept for n in normalize
-                              for t in tol for s in solver for r in random_state]
+                              for t in tol for s in solver]
                     try:
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
