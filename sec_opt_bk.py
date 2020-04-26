@@ -33,10 +33,10 @@ kernel = ['linear', 'rbf']
 C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
 gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
 
-alpha = list(np.arange(0.001, 0.1001, 0.002))
-fit_intercept = [True]
+alpha = [0.001,0.01,0.1,1.0,10.0]
+fit_intercept = [True, False]
 normalize = [True, False]
-tol = list(np.arange(0.0001, 0.0101, 0.0002))
+tol = [1e-5,1e-4,1e-3,1e-2,1e-1]
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
@@ -177,10 +177,11 @@ def main():
                         except Exception as e:
                             print("main, load ", e)
                 else:
+                   
                     params = [{'alpha': a, 'fit_intercept': fit, 'normalize': n, 'tol': t,
-                               'solver': s}
+                               'solver': s, 'random_state': r}
                               for a in alpha for fit in fit_intercept for n in normalize
-                              for t in tol for s in solver]
+                              for t in tol for s in solver for r in random_state]
                     try:
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
@@ -203,11 +204,15 @@ def main():
             pool = []
 
             print("best score %s=%s" % (f, result,))
-            result_df.to_csv("./optimization_results/sec_opt_%s_%s.csv" % (model_name.__name__, f,))
+            print(result_df.head)
+            result_df.to_csv("./optimization_results/sec_opt_%s_%s_old.csv" % (model_name.__name__, f,))
             result_df = pd.DataFrame(columns=columns)
             result = (0, None, None, None)
 
 main()
+
+
+
 
 
 
