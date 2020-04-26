@@ -22,7 +22,7 @@ cls_models = [RidgeClassifier]
 reg_models = [SVR]
 n_bins = 4
 
-target_markets =['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
+target_markets =['MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share'), 'BDT']
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -41,22 +41,24 @@ forex_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y + x for 
 index_features = ['Intraday_HL', 'Intraday_OC', 'Prev_close_open'] + [y + x for x in
                                                                       ['_Ret', '_Ret_MA_3', '_Ret_MA_15', '_Ret_MA_45',
                                                                        '_MTD', '_YTD'] for y in (metrics)]
-param_set = {"('PKR', 'Karachi 100')":{'alpha': 0.01, 'fit_intercept': True, 'normalize': False,
+param_set = {('PKR', 'Karachi 100'):{'alpha': 0.01, 'fit_intercept': True, 'normalize': False,
                                        'tol': 0.001, 'solver': 'sag', 'random_state': 1},
              "BDT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
                           'solver': 'sag', 'random_state': 4},
              "MNT": {'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001,
                           'solver': 'sag', 'random_state': 4},
-             "('LKR', 'CSE All-Share')":{'alpha': 0.001, 'fit_intercept': False, 'normalize': True,
+             ('LKR', 'CSE All-Share'):{'alpha': 0.001, 'fit_intercept': False, 'normalize': True,
                                          'tol': 0.0001, 'solver': 'auto', 'random_state': 1}}
 
 # scalers = [None, MinMaxScaler, StandardScaler]
 xstr = lambda s: '' if s is None else str(s)
 
-y_true = None
+y_fin = None
+done = False
 
 def run_sklearn_model(model, train, test, feat, target,kwargs):
-    global y_true
+    global y_fin
+    global done
     X_train, y_train = train
     X_test, y_test = test
     X_train = pd.DataFrame(X_train)
@@ -81,6 +83,9 @@ def run_sklearn_model(model, train, test, feat, target,kwargs):
         data_y = np.append(data_y, y_test[i])
         data_y = np.delete(data_y, 0, 0)
     y_true = np.vstack((y_train, y_test))
+    if not done:
+        y_fin = y_true
+        done = True
     prediction = pd.DataFrame(prediction)
     acc = accuracy_score(y_true, prediction)
     print(model.__name__ + " accurcay for " + xstr(feat) + " with period " + str(period)+"="+str(acc))
@@ -170,7 +175,8 @@ def iterate_markets():
     shuffle = False
     poly = False
     accuracy_lst = {}
-    global y_true
+    global y_fin
+    global done
     for f_m in target_markets:
         print(f_m)
         for model in cls_models:
@@ -205,14 +211,19 @@ def iterate_markets():
                             reg_res = pd.concat([reg_res, res], axis=1)
 
                             rows.append(i)
-                print(reg_res)
+
                 csv_name = csv_dir + str(f_m) + "_final"
                 final = reg_res.mode(axis=1)
+                if len(final.columns)>1:
+                    final = final.iloc[:,0]
+                    final = pd.DataFrame(final)
                 final.columns = ['pred_mode']
-                accuracy_lst[f_m] = accuracy_score(y_true, final['pred_mode'])
-                print("mode accuracy for {} = {}".format(f_m, accuracy_lst[f_m]))
-                final.to_csv(csv_name+".csv")
-    df = pd.DataFrame().append(accuracy_lst)
+                print(y_fin.shape, final.shape)
+                done = False
+                accuracy_lst[f_m] = accuracy_score(y_fin, final['pred_mode'])
+                print("\nmode accuracy for {} = {}\n".format(f_m, accuracy_lst[f_m]))
+                #final.to_csv(csv_name+".csv")
+    df = pd.DataFrame.from_dict(accuracy_lst)
     df.to_csv(csv_dir + "final_accuracy.csv")
 
 iterate_markets()

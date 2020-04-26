@@ -21,7 +21,7 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [RidgeClassifier]
+cls_models = [SVC]
 target_markets = ['BDT']
 #target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
@@ -30,13 +30,13 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             "BDT": [("IDR", "IDX Composite"), None, "VND"]}
 
 kernel = ['linear', 'rbf']
-C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
-gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
+C = list(np.arange(0.001, 0.1001, 0.002))
+gamma = ['auto','scale'] + (list(np.arange(0.001, .101, 0.002)))
 
-alpha = list(np.arange(0.001, 0.1001, 0.002))
+alpha = list(np.arange(0.0001, 0.02001, 0.0002))
 fit_intercept = [True]
 normalize = [True, False]
-tol = list(np.arange(0.0001, 0.0101, 0.0002))
+tol = list(np.arange(0.001, 0.101, 0.005))
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
@@ -203,7 +203,7 @@ def main():
             pool = []
 
             print("best score %s=%s" % (f, result,))
-            result_df.to_csv("./optimization_results/sec_opt_%s_%s.csv" % (model_name.__name__, f,))
+            result_df.to_csv("./optimization_results/sec_opt_%s_%s_bak.csv" % (model_name.__name__, f,))
             result_df = pd.DataFrame(columns=columns)
             result = (0, None, None, None)
 

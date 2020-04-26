@@ -193,6 +193,8 @@ def iterate_markets():
 
             csv_name = csv_dir + str(f_m) + "_final_" + str(window[f_m])
             final = reg_res.mode(axis=1)
+            print(final.columns)
+            if len(final.columns)>1: final = final.iloc[:,0]
             print(final)
             final.columns = ['pred_mode']
             final.to_csv(csv_name + ".csv")
