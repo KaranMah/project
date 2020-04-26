@@ -166,7 +166,7 @@ def main():
     for f in target_markets:
         for model_name in cls_models:
             for feature in features[f]:
-                print(f,model_name.__name__, feature)
+                print(f, model_name.__name__, feature)
                 if model_name.__name__ == "SVC":
 
                     params = [{'kernel': k, 'C': c, 'gamma': g, 'tol':t}
@@ -185,7 +185,6 @@ def main():
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
                         print("main load", e)
-            #print(len(pool))
             print(f, model_name.__name__, len(pool))
             for i in range(30000, len(pool), 30000):
                 for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:

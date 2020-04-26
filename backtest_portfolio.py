@@ -7,7 +7,7 @@ from sklearn.svm import SVC
 
 from backtest import Strategy, Portfolio
 
-csv_dir = "./walk_forward_opt/mode/"
+csv_dir = "./walk_forward_opt/"
 market = ["forex", "index"]
 target_markets = {"forex": [ 'MNT', 'BDT'],
                   "index": [('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]}
@@ -61,7 +61,7 @@ class MarketIntradayPortfolio(Portfolio):
 
         # Long or short 500 shares of SPY based on
         # directional signal every day
-        positions[self.symbol] = 500 * self.signals['signal']
+        positions[self.symbol] = 100 * self.signals['signal']
         return positions
 
     def backtest_portfolio(self):
@@ -80,7 +80,7 @@ class MarketIntradayPortfolio(Portfolio):
         portfolio['price_diff'] = self.bars['Close'] - self.bars['Open']
         portfolio['price_diff'][0:5] = 0.0
         portfolio['profit'] = self.positions[self.symbol] * (portfolio['price_diff'])
-        # portfolio['fees'] = 500*(bars['Close']*0.002 + bars['Open']*0.002)* abs(portfolio['price_diff'])
+        # portfolio['fees'] = 500*(bars['Close']*0.002 )* abs(portfolio['price_diff'])
         portfolio['fees'] = 500 * 0.002 * abs(portfolio['price_diff'])
         # Generate the equity curve and percentage returns
         portfolio['total'] = self.initial_capital + portfolio['profit'].cumsum() - portfolio['fees'].cumsum()
@@ -132,12 +132,9 @@ if __name__ == "__main__":
         # Obtain the bars for all data
         for symbol in target:
             bars = DataReader(symbol, start_test, end_period, symbol_class)
-            for feat in features[symbol][::-1]:
+            for feat in features[symbol]:
                 data = DataReader(symbol, start_test, end_period, model=model, pred_results=True, is_ret=is_ret,
                                      feat=feat)
-                print(feat)
-                print(data)
-                chomu
                 for col in data.columns:
                     print("%s %s %s"% (symbol, col,feat))
                     signals['signal'] = data[col]
@@ -146,7 +143,7 @@ if __name__ == "__main__":
                     portfolio = MarketIntradayPortfolio(symbol, bars, signals,
                                                         initial_capital=100000.0)
                     returns = portfolio.backtest_portfolio()
-                    #print(returns.iloc[-1])
+                    print(returns.iloc[-1])
                     # Plot results
                     fig = plt.figure()
                     fig.patch.set_facecolor('white')
@@ -160,10 +157,5 @@ if __name__ == "__main__":
                     ax2 = fig.add_subplot(212, ylabel='Portfolio value in $')
                     returns['total'].plot(ax=ax2, lw=2.)
                     #plt.show()
-                    fig.savefig("./images/mode/%s_%s_%s.png"% (symbol,model.__name__,col))
+                    fig.savefig("./images/mode/%s_%s_%s_%s.png"% (symbol,model.__name__,feat,col))
                     plt.close()
-
-    # # if is_ret:
-    # #     fig.savefig("./images/" + symbol + "_" + model + "_ret_res.png")
-    # # else:
-    # #     fig.savefig("./images/"+symbol + "_" + model + "_with_brok_res.png")

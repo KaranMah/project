@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
+from sklearn.decomposition import PCA
 from sklearn.linear_model import *
 from sklearn.metrics import *
 from sklearn.preprocessing import *
 from sklearn.svm import *
 import warnings
 from sklearn.exceptions import DataConversionWarning
+import matplotlib.pyplot as plt
 
 warnings.filterwarnings(action='ignore', category=DataConversionWarning)
 warnings.filterwarnings(action='ignore', category=UserWarning)
@@ -17,10 +19,10 @@ forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
 cls_models = [SVC, RidgeClassifier]
-reg_models = [SVR, LinearSVR, LinearRegression]
+reg_models = [SVR]
 n_bins = 4
 
-target_markets =['BDT' , 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
+target_markets =['MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -73,7 +75,7 @@ def run_sklearn_model(model, train, test, feat, target,kwargs):
         data_y = np.delete(data_y, 0, 0)
     y_true = np.vstack((y_train, y_test))
     prediction = pd.DataFrame(prediction)
-
+    print(y_true, prediction)
     acc = accuracy_score(y_true, prediction)
     print(model.__name__ + " accurcy for " + xstr(feat) + " with period " + str(period)+"="+str(acc))
     x_true = pd.concat([X_train, X_test], axis=0)
@@ -142,8 +144,8 @@ def do_forex(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
+    X_train, X_test = do_pca(X_train, X_test, X_train.columns , int(X_train.shape[0]/5))
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), feat, target,kwargs)
     return res
 
@@ -158,9 +160,23 @@ def do_index(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
+    X_train, X_test = do_pca(X_train,X_test,X_train.columns, int(X_train.shape[0]/5))
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), feat, target,kwargs)
     return (res)
 
+def do_pca(train, test, names, n=None):
+    pca = PCA(n).fit(train)
+    plt.plot(np.cumsum(pca.explained_variance_ratio_))
+    plt.xlabel('Number of components')
+    plt.ylabel('Cumulative explained variance')
+    # plt.show()
+    plt.close()
+    res = (dict(zip(names, pca.explained_variance_ratio_)))
+    sorted_res = (sorted(res.items(), key=lambda x: x[1], reverse=True))
+    #print(sorted_res)
+    X_train = (pca.transform(train))
+    X_test = (pca.transform(test))
+    return(X_train, X_test)
 
 def iterate_markets():
     shuffle = False
@@ -185,7 +201,7 @@ def iterate_markets():
                     reg_res = pd.DataFrame()
                     rows = []
                     for i in range(30, 55, 5):
-                        try:
+                        # try:
                             if (f_m in forex_pairs):
                                 train_index = i
                                 test_index = 0
@@ -200,15 +216,17 @@ def iterate_markets():
                                 res.columns = [xstr(feat) + "_pred_" + str(i)]
 
                             reg_res = pd.concat([reg_res, res], axis=1)
+                            print(reg_res.shape)
                             rows.append(i)
-                        except Exception as e:
-                            print(e)
-                            pass
+                        # except Exception as e:
+                        #     print(e)
+                        #     pass
 
                     csv_name = csv_dir + str(f_m) + "_" + model.__name__ + "_final_" + xstr(feat)
                     final = reg_res.mode(axis=1)
                     final.columns = ['pred_mode']
                     #print(final.head())
-                    final.to_csv(csv_name+".csv")
+                    #reg_res.to_csv(csv_name+".csv")
 
 iterate_markets()
+
