@@ -7,15 +7,16 @@ from sklearn.svm import SVC
 
 from backtest import Strategy, Portfolio
 
-csv_dir = "./walk_forward_opt/"
+csv_dir = "./walk_forward_opt/final/"
 market = ["forex", "index"]
 target_markets = {"forex": [ 'MNT', 'BDT'],
                   "index": [('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]}
-features = {"MNT": [None, "LKR",("NZD", "NZX MidCap")],
-            ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
-            ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
-            "BDT": [None, ("IDR", "IDX Composite"), "VND"]}
+window = {"MNT": [None, "_40"],
+          ('PKR', 'Karachi 100'): [None, "_45"],
+          ('LKR', 'CSE All-Share'): [None, "_30"],
+          "BDT": [None, "_50"]}
 xstr = lambda s: '' if s is None else str(s)
+
 
 class SNPForecastingStrategy(Strategy):
     """
@@ -91,7 +92,7 @@ class MarketIntradayPortfolio(Portfolio):
 def DataReader(symbol, start_date, end_date, symbol_class="forex", model=SVC,
                pred_results=False, is_ret=False, feat=None):
     if pred_results:
-        csv_name = csv_dir + str(symbol) + "_" + model.__name__ + "_final_" + xstr(feat)+".csv"
+        csv_name = csv_dir + str(symbol) + "_final" + xstr(feat)+".csv"
         data = pd.read_csv(csv_name)
         data = data.set_index('Date')
     else:
@@ -123,7 +124,7 @@ if __name__ == "__main__":
     start_test = datetime.datetime(2018, 1, 1)
     end_period = datetime.datetime(2019, 12, 30)
 
-    model = SVC
+    model = RidgeClassifier
     is_ret = False
     w = 5
     signals = pd.DataFrame(columns=['signal'])
@@ -132,7 +133,7 @@ if __name__ == "__main__":
         # Obtain the bars for all data
         for symbol in target:
             bars = DataReader(symbol, start_test, end_period, symbol_class)
-            for feat in features[symbol]:
+            for feat in window[symbol]:
                 data = DataReader(symbol, start_test, end_period, model=model, pred_results=True, is_ret=is_ret,
                                      feat=feat)
                 for col in data.columns:
@@ -147,7 +148,7 @@ if __name__ == "__main__":
                     # Plot results
                     fig = plt.figure()
                     fig.patch.set_facecolor('white')
-                    fig.suptitle(' %s %s final opt %s' % (symbol, model.__name__, col))
+                    fig.suptitle(' %s %s %s' % (symbol, model.__name__, xstr(feat)))
 
                     # Plot the price of the SPY ETF
                     ax1 = fig.add_subplot(211, ylabel=''.join(symbol) + 'price in $')
@@ -157,5 +158,5 @@ if __name__ == "__main__":
                     ax2 = fig.add_subplot(212, ylabel='Portfolio value in $')
                     returns['total'].plot(ax=ax2, lw=2.)
                     #plt.show()
-                    fig.savefig("./images/mode/%s_%s_%s_%s.png"% (symbol,model.__name__,feat,col))
+                    fig.savefig("./images/wf_mode/%s_%s_%s_%s.png"% (symbol,model.__name__,feat,col))
                     plt.close()

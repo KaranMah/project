@@ -144,8 +144,7 @@ def do_forex(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
-    X_train, X_test = do_pca(X_train, X_test, X_train.columns , int(X_train.shape[0]/5))
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, len(X)*0.8), test_index, shuffle, poly)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), feat, target,kwargs)
     return res
 
@@ -160,23 +159,8 @@ def do_index(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, train_index, test_index, shuffle, poly)
-    X_train, X_test = do_pca(X_train,X_test,X_train.columns, int(X_train.shape[0]/5))
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), feat, target,kwargs)
     return (res)
-
-def do_pca(train, test, names, n=None):
-    pca = PCA(n).fit(train)
-    plt.plot(np.cumsum(pca.explained_variance_ratio_))
-    plt.xlabel('Number of components')
-    plt.ylabel('Cumulative explained variance')
-    # plt.show()
-    plt.close()
-    res = (dict(zip(names, pca.explained_variance_ratio_)))
-    sorted_res = (sorted(res.items(), key=lambda x: x[1], reverse=True))
-    #print(sorted_res)
-    X_train = (pca.transform(train))
-    X_test = (pca.transform(test))
-    return(X_train, X_test)
 
 def iterate_markets():
     shuffle = False

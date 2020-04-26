@@ -29,7 +29,6 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             "BDT": [None, "VND", ("IDR", "IDX Composite")]}
 
 window = {"MNT": 40,
-
           ('PKR', 'Karachi 100'): 45,
           ('LKR', 'CSE All-Share'): 30,
           "BDT": 50}
