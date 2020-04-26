@@ -33,10 +33,10 @@ kernel = ['linear', 'rbf']
 C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
 gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
 
-alpha = list(np.arange(0.001, 1.001, 0.002))
+alpha = list(np.arange(0.001, 0.1001, 0.002))
 fit_intercept = [False]
 normalize = [True, False]
-tol = list(np.arange(0.0001, 0.1, 0.0002))
+tol = list(np.arange(0.0001, 0.0101, 0.0002))
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
@@ -149,6 +149,7 @@ def iterate_markets(model, f_m, feat, kwargs):
             reg_res = (res, kwargs, f_m, feat)
 
     except Exception as e:
+        print(e)
         pass
     with result_lock:
         if result[0] < reg_res[0]:
@@ -165,8 +166,9 @@ def main():
     for f in target_markets:
         for model_name in cls_models:
             for feature in features[f]:
-                print(f,model_name.__name__,feature)
+                print(f, model_name.__name__, feature)
                 if model_name.__name__ == "SVC":
+
                     params = [{'kernel': k, 'C': c, 'gamma': g, 'tol':t}
                               for k in kernel for c in C for g in gamma for t in tol]
                     for ind, p in enumerate(params):
@@ -183,16 +185,20 @@ def main():
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
                         print("main load", e)
-            #print(len(pool))
-            print(f, model_name.__name__)
-            for thread in pool:
-                try:
-                    thread.start()
-                except Exception as e:
-                    print("main, start ", e)
+            print(f, model_name.__name__, len(pool))
+            for i in range(0, len(pool), 30000):
+                print(i, i+30000)
+                for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:
+                    
+                    try:
+                        thread.start()
+                    except Exception as e:
+                        print("main, start ", e)
 
-            for thread in pool:
-                thread.join()
+                for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:
+                    thread.join()
+                if i+30000 > len(pool):
+                    break
 
             pool = []
 
