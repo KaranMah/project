@@ -43,6 +43,7 @@ def get_results(tag):
     daily_scores = pd.DataFrame()
     df = pd.DataFrame(columns=['test_score'])
     for file in file_list_with_same_tag:
+        print(file)
         res = pd.read_json(RESULTS_PATH + file, lines=True)
         temp = pd.DataFrame()
         res.sort_index()
@@ -64,21 +65,21 @@ AGGREGATE_PATH = "/data/aggregate/"
 hashtags = []
 
 #countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
-countryList = ["#Dhaka"]
+countryList = ["#HoChi"]
 allFiles = [f for f in listdir(RESULTS_PATH) if (isfile(join(RESULTS_PATH, f)) and any(j in f for j in countryList))]
 allFiles.sort()
 newTag = ""
 scores = pd.DataFrame(columns=['Average','Max','Min','Std','Variance','Count'])
-for file_name in allFiles:
-    print(file_name)
-    name = file_name.split('_')
-    if name[0] == "r":
-        newTag = name[1]
-        timestamp = 'timestamp'
-    else:
-        newTag = name[0]
-        timestamp = 'datetime'
-    scores = scores.append(get_results(newTag))
+
+
+name = allFiles[0].split('_')
+if name[0] == "r":
+    newTag = name[1]
+    timestamp = 'timestamp'
+else:
+    newTag = name[0]
+    timestamp = 'datetime'
+scores = (get_results(newTag))
 
 save_results(newTag, scores)
 

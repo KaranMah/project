@@ -33,10 +33,10 @@ kernel = ['linear', 'rbf']
 C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
 gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
 
-alpha = list(np.arange(0.001, 1.001, 0.002))
+alpha = list(np.arange(0.001, 0.1001, 0.002))
 fit_intercept = [False]
 normalize = [True, False]
-tol = list(np.arange(0.0001, 0.1, 0.0002))
+tol = list(np.arange(0.0001, 0.0101, 0.0002))
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
@@ -186,15 +186,16 @@ def main():
                     except Exception as e:
                         print("main load", e)
             print(f, model_name.__name__, len(pool))
-            for i in range(30000, len(pool), 30000):
+            for i in range(0, len(pool), 30000):
+                print(i, i+30000)
                 for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:
-                    print(i, i+30000)
+                    
                     try:
                         thread.start()
                     except Exception as e:
                         print("main, start ", e)
 
-                for thread in pool:
+                for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:
                     thread.join()
                 if i+30000 > len(pool):
                     break
