@@ -189,13 +189,13 @@ def iterate_markets():
                         res.columns = [xstr(feat) + "_pred_" + str(i)]
 
                     reg_res = pd.concat([reg_res, res], axis=1)
-                    rows.append(i)
+
 
             csv_name = csv_dir + str(f_m) + "_final_" + str(window[f_m])
             final = reg_res.mode(axis=1)
             print(final)
             final.columns = ['pred_mode']
-            reg_res.to_csv(csv_name + ".csv")
+            final.to_csv(csv_name + ".csv")
 
 
 iterate_markets()

@@ -211,7 +211,7 @@ def iterate_markets():
                 final.columns = ['pred_mode']
                 accuracy_lst[f_m] = accuracy_score(y_true, final['pred_mode'])
                 print("mode accuracy for {} = {}".format(f_m, accuracy_lst[f_m]))
-                reg_res.to_csv(csv_name+".csv")
+                final.to_csv(csv_name+".csv")
     df = pd.DataFrame().append(accuracy_lst)
     df.to_csv(csv_dir + "final_accuracy.csv")
 
