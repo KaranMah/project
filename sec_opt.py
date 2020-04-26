@@ -33,10 +33,10 @@ kernel = ['linear', 'rbf']
 C = [1e-4, 0.001,0.005,.01,.05,.1,.2,.3,.4,.5]
 gamma = ['auto','scale',0.01,0.02,0.03,0.04,0.05,0.10,0.2,0.3,0.4,0.5]
 
-alpha = range(0.001, 1.001, 0.001)
-fit_intercept = [True, False]
+alpha = list(np.arrange(0.001, 1.001, 0.002))
+fit_intercept = [False]
 normalize = [True, False]
-tol = range(0.0001, 0.1, 0.0001)
+tol = list(np.arrange(0.0001, 0.1, 0.0002))
 solver = ['auto','sag']
 random_state = [1,2,3,4,5,6,7,8,9,10]
 
