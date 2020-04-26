@@ -1,6 +1,7 @@
 import json
 import math
 import pprint
+import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -74,6 +75,23 @@ def add_cross_domain_features(feat):
         X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     return(X)
 
+def get_sentiment(cur):
+    sent_map = {'BDT': 'Dhaka',
+                     'MNT': 'UlaanBaatar',
+                     ('PKR', 'Karachi 100'): 'Karachi',
+                     ('LKR', 'CSE All-Share'): 'Colombo'}
+    fill_vals = {'Avg': 0.5, 'Max': 0.5, 'Min': 0.5,
+                 'Std': 0.0, 'Var': 0.0, 'Count': 0}
+    f = lambda s: datetime.datetime.strptime(s,'%d-%m-%Y')
+    ss = '#' + sent_map[cur]+ '_aggregated_data.csv'
+    sd = pd.read_csv(ss, header=0, parse_dates=[0], date_parser=f,
+                     names=['Date', 'Avg', 'Max', 'Min', 'Std', 'Var', 'Count'])
+    sd = sd.set_index(sd['Date']).drop(['Date'], axis=1)
+    sd.index = sd.index.strftime("%Y-%m-%d")
+    sd = sd.fillna(value = fill_vals)
+    col_names = (pd.MultiIndex.from_tuples([('Sentiment', x) for x in sd.columns]))
+    sd.columns = col_names
+    return(sd)
 
 def run_sklearn_model(model, train, test, features, target):
     try:
@@ -160,6 +178,8 @@ def do_forex(cur, model, feat=None, transf = None, shuffle=False, poly=False, tr
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     if feat:
         X = X.join(add_cross_domain_features(feat))
+    sent = get_sentiment(cur)
+    X = X.join(sent, how='left')
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
     X_train, X_test, y_train, y_test = split_scale(X, y, transf, shuffle, poly, transf_features_also)

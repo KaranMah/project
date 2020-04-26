@@ -1,6 +1,7 @@
 import json
 import math
 import pprint
+import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -98,11 +99,30 @@ def split_scale(X, y, scaler, shuffle=False, poly=False):
         y_test = scaler_y.transform(y_test)
     return(X_train, X_test, y_train, y_test)
 
+def get_sentiment(cur):
+    sent_map = {'BDT': 'Dhaka',
+                     'MNT': 'UlaanBaatar',
+                     ('PKR', 'Karachi 100'): 'Karachi',
+                     ('LKR', 'CSE All-Share'): 'Colombo'}
+    fill_vals = {'Avg': 0.5, 'Max': 0.5, 'Min': 0.5,
+                 'Std': 0.0, 'Var': 0.0, 'Count': 0}
+    f = lambda s: datetime.datetime.strptime(s,'%d-%m-%Y')
+    ss = '#' + sent_map[cur]+ '_aggregated_data.csv'
+    sd = pd.read_csv(ss, header=0, parse_dates=[0], date_parser=f,
+                     names=['Date', 'Avg', 'Max', 'Min', 'Std', 'Var', 'Count'])
+    sd = sd.set_index(sd['Date']).drop(['Date'], axis=1)
+    sd.index = sd.index.strftime("%Y-%m-%d")
+    sd = sd.fillna(value = fill_vals)
+    col_names = (pd.MultiIndex.from_tuples([('Sentiment', x) for x in sd.columns]))
+    sd.columns = col_names
+    return(sd)
 
 def do_forex(cur, model, transf = None, shuffle=False, poly=False):
     forex_cols = [x for x in forex.columns if x[1] == cur]
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
+    sentiment = get_sentiment(cur)
+    X = X.join(sentiment, how='left')
     X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
@@ -150,4 +170,4 @@ def iterate_markets():
 # res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
 # print(res_df)
 # res_df.to_csv("sk_regression.csv")
-do_forex('MNT', LinearRegression, None, True)
+do_forex('BDT', Ridge, None, False)
