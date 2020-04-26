@@ -22,8 +22,8 @@ forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
 cls_models = [RidgeClassifier]
-
-target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
+target_markets = ['BDT']
+#target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -149,6 +149,7 @@ def iterate_markets(model, f_m, feat, kwargs):
             reg_res = (res, kwargs, f_m, feat)
 
     except Exception as e:
+        print(e)
         pass
     with result_lock:
         if result[0] < reg_res[0]:
@@ -165,7 +166,9 @@ def main():
     for f in target_markets:
         for model_name in cls_models:
             for feature in features[f]:
+                print(f,model_name.__name__, feature)
                 if model_name.__name__ == "SVC":
+
                     params = [{'kernel': k, 'C': c, 'gamma': g, 'tol':t}
                               for k in kernel for c in C for g in gamma for t in tol]
                     for ind, p in enumerate(params):
@@ -183,15 +186,19 @@ def main():
                     except Exception as e:
                         print("main load", e)
             #print(len(pool))
-            print(f, model_name.__name__)
-            for thread in pool:
-                try:
-                    thread.start()
-                except Exception as e:
-                    print("main, start ", e)
+            print(f, model_name.__name__, len(pool))
+            for i in range(30000, len(pool), 30000):
+                for thread in pool[i:(i+30000 if i+30000 < len(pool) else len(pool))]:
+                    print(i, i+30000)
+                    try:
+                        thread.start()
+                    except Exception as e:
+                        print("main, start ", e)
 
-            for thread in pool:
-                thread.join()
+                for thread in pool:
+                    thread.join()
+                if i+30000 > len(pool):
+                    break
 
             pool = []
 
