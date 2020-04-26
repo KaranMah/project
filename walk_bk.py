@@ -84,12 +84,9 @@ def run_sklearn_model(model, train, test, feat, target, kwargs):
         data_y = np.append(data_y, y_test[i])
         data_y = np.delete(data_y, 0, 0)
     y_true = np.vstack((y_train, y_test))
-    prediction = pd.DataFrame(prediction)
     acc = accuracy_score(y_true, prediction)
     print(model.__name__ + " accurcy with " + xstr(feat) + " for window period " + str(period) + "=" + str(acc))
-    x_true = pd.concat([X_train, X_test], axis=0)
-    prediction.index = x_true.index
-    return acc
+    return acc*100
 
 
 def split_scale_kbins(X, y, scaler, train_index, test_index, shuffle=False, poly=False):
