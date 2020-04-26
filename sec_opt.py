@@ -22,8 +22,8 @@ forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
 cls_models = [RidgeClassifier]
-
-target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
+target_markets = ['BDT']
+#target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             ('PKR', 'Karachi 100'): [None, "INR", ('JPY', 'NIkkei 225')],
             ('LKR', 'CSE All-Share'): [None, "IDR", ('MNT', 'MNE Top 20')],
@@ -165,6 +165,7 @@ def main():
     for f in target_markets:
         for model_name in cls_models:
             for feature in features[f]:
+                print(f,model_name.__name__,feature)
                 if model_name.__name__ == "SVC":
                     params = [{'kernel': k, 'C': c, 'gamma': g, 'tol':t}
                               for k in kernel for c in C for g in gamma for t in tol]

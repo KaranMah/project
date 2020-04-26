@@ -1,8 +1,7 @@
 from os import listdir
 from os.path import join, isfile
-
 import pandas as pd
-
+import datetime
 def get_daily_values(data, daily_scores=pd.DataFrame()):
     r = data.resample('D')
     daily_scores['Average'] = r.mean()['test_score']
