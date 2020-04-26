@@ -65,11 +65,11 @@ AGGREGATE_PATH = "/data/aggregate/"
 hashtags = []
 
 #countryList = ['Pakistan', 'Mongolia', 'Bangladesh', 'SriLanka', 'Karachi', 'Dhaka', 'Ulaanbaatar', 'Colombo']
-countryList = ["#Ulaan"]
+countryList = ["#Dhaka"]
 allFiles = [f for f in listdir(RESULTS_PATH) if (isfile(join(RESULTS_PATH, f)) and any(j in f for j in countryList))]
-allFiles = ["#Ulaanbaatar_since_2010-01-01_until_2019-12-31.json"]
 allFiles.sort()
-
+newTag = ""
+scores = pd.DataFrame(columns=['Average','Max','Min','Std','Variance','Count'])
 for file_name in allFiles:
     print(file_name)
     name = file_name.split('_')
@@ -79,9 +79,9 @@ for file_name in allFiles:
     else:
         newTag = name[0]
         timestamp = 'datetime'
-    scores = get_results(newTag)
+    scores = scores.append(get_results(newTag))
 
-    save_results(newTag, scores)
+save_results(newTag, scores)
 
         
 
