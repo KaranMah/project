@@ -30,7 +30,7 @@ class ClasStrat(Strategy):
     n2 = 60
 
     def init(self):
-        pred = pd.read_csv(csv_dir + cur + "_final" + xstr(win) + ".csv")
+        pred = pd.read_csv(csv_dir + str(cur) + "_final" + xstr(win) + ".csv")
         res = pred[['pred_mode']]
         res = res[int(len(res)*.8):]
         maj = np.array(majority(res, self.window)).ravel()
@@ -45,8 +45,8 @@ class ClasStrat(Strategy):
             self.buy()
 
 def readData(curr):
-    
-    if not isinstance(curr,tuple):
+    data = pd.DataFrame()
+    if not isinstance(curr, tuple):
         csv = "prep_forex.csv"
         data = pd.read_csv(csv, header=[0, 1], index_col=0)
         forex_features_bt = ["Open", "Close", "High", "Low", "Volume"]
@@ -54,6 +54,7 @@ def readData(curr):
         data = data[[col for col in forex_cols_bt if col[0] in forex_features_bt]][:-1]
         data.columns = [x[0] for x in list(data.columns)]
         data = data.dropna(how='any')
+
     else:
         csv = "prep_index.csv"
         data = pd.read_csv(csv, header=[0, 1, 2], index_col=0)
@@ -62,6 +63,8 @@ def readData(curr):
         data = data[[col for col in index_cols_bt if col[0] in index_features_bt]][:-1]
         data.columns = [x[0] for x in list(data.columns)]
         data = data.dropna(how='any')
+    data.index = pd.to_datetime(data.index)
+
     return data
 
 target_markets = ['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
@@ -80,7 +83,7 @@ for f_m in target_markets:
         bt = Backtest(data, ClasStrat, cash=100000, commission=0.002, trade_on_close=True)
         res = bt.run()
         # print(res)
-        fileName = "./images/bt_plot/"+cur + xstr(win)
+        fileName = "./images/bt_plot/"+str(cur) + xstr(win)
         bt.plot(filename=fileName)
         stats, heat_map = bt.optimize(window=range(2, 10, 1),
                         n1=range(5, 30, 5),
@@ -89,7 +92,7 @@ for f_m in target_markets:
                         constraint=lambda p: p.n1 < p.n2,
                         return_heatmap=True)
 
-        fileName = "./images/bt_plot/heatmap_" + cur + xstr(win)
+        fileName = "./images/bt_plot/heatmap_" + str(cur) + xstr(win)
         plot_heatmaps(heatmap=heat_map, filename=fileName+"_heatmap")
-        print(cur + xstr(win))
+        print(str(cur) + xstr(win))
         print(stats)
