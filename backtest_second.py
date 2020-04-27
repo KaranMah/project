@@ -45,12 +45,23 @@ class ClasStrat(Strategy):
             self.buy()
 
 def readData(curr):
-    forex_features_bt = ["Open", "Close", "High", "Low", "Volume"]
-    forex_cols_bt = [x for x in forex.columns if x[1] == curr]
-    data = forex[[col for col in forex_cols_bt if col[0] in forex_features_bt]][:-1]
-    data.columns = [x[0] for x in list(data.columns)]
-    data = data.dropna(how='any')
-    data.index = pd.to_datetime(data.index)
+    
+    if not isinstance(curr,tuple):
+        csv = "prep_forex.csv"
+        data = pd.read_csv(csv, header=[0, 1], index_col=0)
+        forex_features_bt = ["Open", "Close", "High", "Low", "Volume"]
+        forex_cols_bt = [x for x in data.columns if x[1] == curr]
+        data = data[[col for col in forex_cols_bt if col[0] in forex_features_bt]][:-1]
+        data.columns = [x[0] for x in list(data.columns)]
+        data = data.dropna(how='any')
+    else:
+        csv = "prep_index.csv"
+        data = pd.read_csv(csv, header=[0, 1, 2], index_col=0)
+        index_features_bt = ["Open", "Close", "High", "Low", "Volume"]
+        index_cols_bt = [x for x in data.columns if x[1] == curr[0] and x[2] == curr[1]]
+        data = data[[col for col in index_cols_bt if col[0] in index_features_bt]][:-1]
+        data.columns = [x[0] for x in list(data.columns)]
+        data = data.dropna(how='any')
     return data
 
 target_markets = ['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
