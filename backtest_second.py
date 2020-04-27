@@ -25,9 +25,9 @@ def getTom(pred):
 
 
 class ClasStrat(Strategy):
-    window = 4
+    window = 2
     n1 = 15
-    n2 = 60
+    n2 = 45
 
     def init(self):
         pred = pd.read_csv(csv_dir + str(cur) + "_final" + xstr(win) + ".csv")
@@ -67,7 +67,7 @@ def readData(curr):
 
     return data
 
-target_markets = ['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
+target_markets = ['BDT']
 window = {"MNT": [None, "_40"],
           ('PKR', 'Karachi 100'): [None, "_45"],
           ('LKR', 'CSE All-Share'): [None, "_30"],
@@ -77,22 +77,12 @@ forex_pairs.sort()
 for f_m in target_markets:
     cur = f_m
     print(cur)
-    for win in window[f_m]:
+    for win in ["_50"]:
         data = readData(cur)
         data = data[int(len(data)*.8):]
         bt = Backtest(data, ClasStrat, cash=100000, commission=0.002, trade_on_close=True)
         res = bt.run()
         # print(res)
-        fileName = "./images/bt_plot/"+str(cur) + xstr(win)
+        fileName = "./images/bt_plot/opt_"+str(cur) + xstr(win)
         bt.plot(filename=fileName)
-        stats, heat_map = bt.optimize(window=range(2, 10, 1),
-                        n1=range(5, 30, 5),
-                        n2=range(20, 80, 5),
-                        maximize='Equity Final [$]',
-                        constraint=lambda p: p.n1 < p.n2,
-                        return_heatmap=True)
-
-        fileName = "./images/bt_plot/heatmap_" + str(cur) + xstr(win)
-        plot_heatmaps(heatmap=heat_map, filename=fileName+"_heatmap")
-        print(str(cur) + xstr(win))
-        print(stats)
+        
