@@ -1,14 +1,1 @@
 ,accuracy,args,target_market,feature_used
-0,0.668695652173913,"{'alpha': 0.001, 'fit_intercept': False, 'normalize': True, 'tol': 0.01, 'solver': 'sag', 'random_state': 4}",BDT,VND
-0,0.6721739130434783,"{'alpha': 0.01, 'fit_intercept': True, 'normalize': False, 'tol': 0.0001, 'solver': 'sag', 'random_state': 5}",BDT,VND
-0,0.6730434782608695,"{'alpha': 0.01, 'fit_intercept': True, 'normalize': False, 'tol': 0.001, 'solver': 'sag', 'random_state': 1}",BDT,VND
-0,0.6760869565217391,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.01, 'solver': 'sag', 'random_state': 1}",BDT,VND
-0,0.6773913043478261,"{'alpha': 0.1, 'fit_intercept': True, 'normalize': False, 'tol': 0.001, 'solver': 'sag', 'random_state': 4}",BDT,VND
-0,0.6778260869565217,"{'alpha': 0.1, 'fit_intercept': True, 'normalize': False, 'tol': 0.01, 'solver': 'sag', 'random_state': 4}",BDT,VND
-0,0.678695652173913,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.0001, 'solver': 'sag', 'random_state': 1}",BDT,VND
-0,0.6808695652173913,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.01, 'solver': 'sag', 'random_state': 1}",BDT,VND
-0,0.6834782608695652,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.0001, 'solver': 'sag', 'random_state': 2}",BDT,VND
-0,0.6839130434782609,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.01, 'solver': 'sag', 'random_state': 5}",BDT,VND
-0,0.6843478260869565,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.01, 'solver': 'sag', 'random_state': 4}",BDT,VND
-0,0.6891304347826087,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.0001, 'solver': 'sag', 'random_state': 1}",BDT,VND
-0,0.6895652173913044,"{'alpha': 10.0, 'fit_intercept': True, 'normalize': True, 'tol': 0.001, 'solver': 'sag', 'random_state': 4}",BDT,VND
