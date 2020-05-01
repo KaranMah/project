@@ -67,7 +67,7 @@ def readData(curr):
 
     return data
 
-target_markets = ['BDT']
+target_markets = ['BDT', 'MNT', ('PKR', 'Karachi 100'), ('LKR', 'CSE All-Share')]
 window = {"MNT": [None, "_40"],
           ('PKR', 'Karachi 100'): [None, "_45"],
           ('LKR', 'CSE All-Share'): [None, "_30"],
@@ -77,12 +77,19 @@ forex_pairs.sort()
 for f_m in target_markets:
     cur = f_m
     print(cur)
-    for win in ["_50"]:
+    for win in window[f_m]:
         data = readData(cur)
         data = data[int(len(data)*.8):]
         bt = Backtest(data, ClasStrat, cash=100000, commission=0.002, trade_on_close=True)
         res = bt.run()
-        # print(res)
+        print(res)
         fileName = "./images/bt_plot/opt_"+str(cur) + xstr(win)
         bt.plot(filename=fileName)
+        stats = bt.optimize(window=range(2, 10, 1),
+                             i=range(lower_lim, upper_lim, 5),
+                             n1=range(5, 30, 5),
+                             n2=range(20, 80, 5),
+                             maximize='Equity Final [$]',
+                             constraint=lambda p: p.n1 < p.n2)
+        print(stats)
         
