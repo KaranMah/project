@@ -71,14 +71,17 @@ def run_sklearn_model(model, train, test, feat, target, kwargs):
     data_y = y_train
     for i, t in enumerate(X_test.values):
         global accuracy_lst
-        reg = model(**kwargs)
-        reg.fit(data, data_y)
-        if i == 0:
-            y = reg.predict(X_train)
-            for elem in y:
-                prediction.append(elem)
-        y = reg.predict([t])
-        prediction.append(y[0])
+        try:
+            reg = model(**kwargs)
+            reg.fit(data, data_y)
+            if i == 0:
+                y = reg.predict(X_train)
+                for elem in y:
+                    prediction.append(elem)
+            y = reg.predict([t])
+            prediction.append(y[0])
+        except:
+            prediction.append(prediction[-1])
         data = np.vstack((data, t))
         data = np.delete(data, 0, 0)
         data_y = np.append(data_y, y_test[i])
@@ -182,6 +185,7 @@ def do_index(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = index[[col for col in index_cols if col[0] in index_features + ['Time features']]][:-1]
     if feat:
         X = X.join(add_cross_domain_features(feat))
+    # X = X.join(get_sentiment(cur))
     y = index[[col for col in index_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
@@ -214,21 +218,24 @@ def iterate_markets():
                     res = {}
                     rows = []
                     for i in range(30, 51, 5):
-                        # try:
-                        if f_m in forex_pairs:
-                            train_index = i
-                            test_index = 0
-                            res[str(i)] = do_forex(f_m, model, train_index, test_index, feat, scaler, shuffle, poly,
+                        try:
+                            if f_m in forex_pairs:
+                                train_index = i
+                                test_index = 0
+                                res[str(f_m)+str(i)] = do_forex(f_m, model, train_index, test_index, feat, scaler, shuffle, poly,
                                                    kwargs)
-                        else:
-                            train_index = i
-                            test_index = 0
-                            res[str(i)] = do_index(f_m, model, train_index, test_index, feat, scaler, shuffle, poly,
+                            else:
+                                train_index = i
+                                test_index = 0
+                                res[str(f_m)+str(i)] = do_index(f_m, model, train_index, test_index, feat, scaler, shuffle, poly,
                                                    kwargs)
+                        except Exception as e:
+                            print(e)
+                            pass
                     reg_res = reg_res + [res]
     df = pd.DataFrame().append(reg_res)
     print(df)
-    df.to_csv("%s_%s_window_accuracies.csv" % (csv_dir, cls_models[0].__name__))
+    df.to_csv("%s%s_window_accuracies.csv" % (csv_dir, cls_models[0].__name__))
 
 
 iterate_markets()

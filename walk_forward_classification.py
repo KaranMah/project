@@ -139,12 +139,11 @@ def do_forex(cur, model, train_index, test_index, feat, transf=None, shuffle=Fal
     X = forex[[col for col in forex_cols if col[0] in forex_features + ['Time features']]][:-1]
     if feat:
         X = X.join(add_cross_domain_features(feat))
-
     y = forex[[col for col in forex_cols if col[0] in target]].shift(-1)[:-1]
     X = X.dropna(how='all', axis=1)
     X = X.dropna(how='any')
     y = y[y.index.isin(X.index)]
-    X_train, X_test, y_train, y_test = split_scale(X, y, transf, len(X)*0.8), test_index, shuffle, poly)
+    X_train, X_test, y_train, y_test = split_scale(X, y, transf, len(X)*0.8, test_index, shuffle, poly)
     res = run_sklearn_model(model, (X_train, y_train), (X_test, y_test), feat, target,kwargs)
     return res
 
@@ -185,7 +184,7 @@ def iterate_markets():
                     reg_res = pd.DataFrame()
                     rows = []
                     for i in range(30, 55, 5):
-                        # try:
+                        try:
                             if (f_m in forex_pairs):
                                 train_index = i
                                 test_index = 0
@@ -202,15 +201,15 @@ def iterate_markets():
                             reg_res = pd.concat([reg_res, res], axis=1)
                             print(reg_res.shape)
                             rows.append(i)
-                        # except Exception as e:
-                        #     print(e)
-                        #     pass
+                        except Exception as e:
+                            print(e)
+                            pass
 
                     csv_name = csv_dir + str(f_m) + "_" + model.__name__ + "_final_" + xstr(feat)
                     final = reg_res.mode(axis=1)
                     final.columns = ['pred_mode']
-                    #print(final.head())
-                    #reg_res.to_csv(csv_name+".csv")
+                    print(final.head())
+                    reg_res.to_csv(csv_name+".csv")
 
 iterate_markets()
 

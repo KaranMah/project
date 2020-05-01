@@ -222,8 +222,8 @@ def iterate_markets():
                 done = False
                 accuracy_lst[f_m] = accuracy_score(y_fin, final['pred_mode'])
                 print("\nmode accuracy for {} = {}\n".format(f_m, accuracy_lst[f_m]))
-                #final.to_csv(csv_name+".csv")
-    df = pd.DataFrame.from_dict(accuracy_lst)
-    df.to_csv(csv_dir + "final_accuracy.csv")
+                final.to_csv(csv_name+".csv")
+    # df = pd.DataFrame.from_dict(accuracy_lst)
+    # df.to_csv(csv_dir + "final_accuracy.csv")
 
 iterate_markets()
