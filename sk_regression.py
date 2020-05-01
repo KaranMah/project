@@ -166,8 +166,7 @@ def iterate_markets():
                         reg_res.append(res)
     return(reg_res)
 
-# res = iterate_markets()
-# res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
+res = iterate_markets()
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2'])
 # print(res_df)
-# res_df.to_csv("sk_regression.csv")
-do_forex('BDT', Ridge, None, False)
+res_df.to_csv("sk_regression.csv")

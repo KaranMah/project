@@ -191,9 +191,9 @@ def iterate_markets():
     return(reg_res)
 
 #
-# res = iterate_markets()
-# res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
+res = iterate_markets()
+res_df = pd.DataFrame(res, columns= ['Pair', 'MSE', 'R2', 'Order', 'Seasonal_Order', 'AIC', 'BIC', 'F1', 'Precision', 'Recall'])
 # # print(res_df)
-# res_df.to_csv("naive_arima.csv")
-res = do_forex_arima(cur, metric, False, None)
-print(res)
+res_df.to_csv("naive_arima.csv")
+# res = do_forex_arima(cur, metric, False, None)
+# print(res)

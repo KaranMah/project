@@ -224,12 +224,12 @@ def iterate_markets():
                             reg_res.append(res)
     return(reg_res)
 
-# res = iterate_markets()
-# res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
+res = iterate_markets()
+res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'Features transformed', 'F1', 'Precision', 'Recall', 'AUC'])
 # print(res_df)
-# res_df.to_csv("sk_classification.csv")
+res_df.to_csv("sk_classification.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
-cur = 'BDT'
-mod = RandomForestClassifier
-do_forex(cur, mod, None, Binarizer, False, False, False)
+# cur = 'BDT'
+# mod = RandomForestClassifier
+# do_forex(cur, mod, None, Binarizer, False, False, False)
 # do_index(('PKR', 'Karachi 100'), RandomForestClassifier, Binarizer, False, False, False)

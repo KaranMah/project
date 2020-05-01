@@ -177,5 +177,5 @@ def iterate_markets():
 res = iterate_markets()
 res_df = pd.DataFrame(res, columns= ['Pair', 'Model', 'Transformation', 'Shuffle', 'Poly', 'MSE', 'R2', 'F1', 'Precision', 'Recall', 'AUC'])
 # print(res_df)
-res_df.to_csv("sk_forex_index_regression.csv")
+res_df.to_csv("sk_all_features.csv")
 # do_stuff(["HKD", "Hang Seng"], LinearRegression)
