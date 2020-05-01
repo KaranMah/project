@@ -21,7 +21,7 @@ index = pd.read_csv('prep_index.csv', header=[0, 1, 2], index_col=0)
 forex_pairs = list(set([x[1] for x in forex.columns if x[0] == 'Close']))
 index_pairs = list(set([(x[1], x[2]) for x in index.columns if x[0] == 'Close']))
 
-cls_models = [SVC]
+cls_models = [RidgeClassifier]
 target_markets = ['BDT']
 #target_markets = ['MNT', 'BDT', ('LKR', 'CSE All-Share'), ('PKR', 'Karachi 100')]
 features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
@@ -31,9 +31,9 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
 
 kernel = ['linear', 'rbf']
 C = list(np.arange(0.001, 0.1001, 0.002))
-gamma = ['auto','scale'] + (list(np.arange(0.001, .101, 0.002)))
+gamma = ['auto','scale'] + (list(np.arange(0.001, .101, 0.005)))
 
-alpha = list(np.arange(0.0001, 0.02001, 0.0002))
+alpha = list(np.arange(0.01, 10.01, 0.05))
 fit_intercept = [True]
 normalize = [True, False]
 tol = list(np.arange(0.001, 0.101, 0.005))

@@ -28,14 +28,13 @@ features = {"MNT": [None, "LKR", ("NZD", "NZX MidCap")],
             "BDT": [("IDR", "IDX Composite"), None, "VND"]}
 
 kernel = ['linear', 'rbf']
-C = [0.001,.01,.05,.1,.5,1.0]
-gamma = ['auto', 'scale']
-alpha = [0.01,0.1,1.0,10.0]
+C = list(np.arange(0.001, 1.0001, 0.005))
+gamma = ['auto','scale'] # + (list(np.arange(0.001, .101, 0.005)))
+alpha = list(np.arange(0.01, 10.01, 0.05))
 fit_intercept = [True, False]
 normalize = [True, False]
-tol = [1e-5,1e-4,1e-3,1e-2]
+tol = list(np.arange(0.001, 0.101, 0.01))
 solver = ['auto','sag']
-random_state = [2,3,4,5]
 
 result = (0, None, None, None, None)
 result_lock = Lock()
@@ -187,7 +186,7 @@ def main():
     global result
 
     pool = []
-    for f in target_markets:
+    for f in ["BDT"]:
         for model_name in cls_models:
             for feature in features[f]:
                 if model_name.__name__ == "SVC":
@@ -200,14 +199,14 @@ def main():
                             print("main, load ", e)
                 else:
                     params = [{'alpha': a, 'fit_intercept': fit, 'normalize': n, 'tol': t,
-                               'solver': s, 'random_state': r}
+                               'solver': s}
                               for a in alpha for fit in fit_intercept for n in normalize
-                              for t in tol for s in solver for r in random_state]
+                              for t in tol for s in solver]
                     try:
                         pool = [Thread(target=iterate_markets, args=(model_name, f, feature, p)) for p in params]
                     except Exception as e:
                         print("main load", e)
-            #print(len(pool))
+            print(len(pool))
             print(f, model_name.__name__)
             for thread in pool:
                 #try:
