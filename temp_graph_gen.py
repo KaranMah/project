@@ -23,7 +23,7 @@ def Ridge(file):
     data = data.drop(['args', 'target_market', 'feature_used'], axis=1)
     vars = ['alpha', 'fit_intercept', 'normalize', 'tol', 'solver']
     nd = data.groupby(vars, as_index=False)['accuracy'].mean()
-    nd = nd[nd['fit_intercept'] == False]
+    nd = nd[nd['fit_intercept'] == True]
     nd = nd[nd['normalize'] == False]
     nd = nd.drop(['fit_intercept', 'normalize'], axis=1)
     print(nd)
@@ -31,6 +31,10 @@ def Ridge(file):
     ax = Axes3D(fig)
     surf = ax.plot_trisurf(nd['alpha'], nd['tol'], nd['accuracy'], cmap = cm.coolwarm,
                        linewidth=0, antialiased=False)
+    plt.title("RidgeClassifier BDT Optimization")
+    ax.set_xlabel('Alpha',rotation=150)
+    ax.set_ylabel('Tolerance')
+    ax.set_zlabel('Accuracy')
     plt.show()
 
 
@@ -47,6 +51,8 @@ def SVC(file):
     ax = Axes3D(fig)
     surf = ax.plot_trisurf(nd['C'], nd['tol'], nd['accuracy'], cmap = cm.coolwarm,
                        linewidth=0, antialiased=False)
+
+
     plt.show()
 
 Ridge(files[0])
