@@ -87,7 +87,8 @@ python create_sentiment_aggregate.py
 The script to run the optimized selected model
 
 ```shell
-#TODO Karan
+python sec_opt.py
+python optimization_mult.py
 ```
 
 ### Backtesting 
@@ -95,14 +96,15 @@ The script to run the optimized selected model
 The script to run the backtesting strategy to evaluate performance.
 
 ```shell
-#TODO Karan
+python backtest_portfolio.py
+python bcaktest_second.py
 ```
 
 ## Results Obtained
 
 ### Optimized Model Approach
 
-#TODO Karan, add classification report wala table if it looks good.
+![Ridge Classifier classification on 80-20 split]{https://github.com/KaranMah/project/blob/master/Additional_docs/80-20%20split%20BDT%20classification.png?raw=true}
 
 ### Backtesting 
 
