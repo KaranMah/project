@@ -1,4 +1,4 @@
-# Financial Data Forecaster - Repository
+# Financial Data Forecaster
 
 Repository for final year project of building a financial data forecaster.
 
@@ -73,3 +73,37 @@ Script to use BERT on collected posts from social media to obtain sentiment scor
 python test_bert.py
 ```
 
+### Feature Engineering
+
+Scripts to aggregate sentiment scores and build new features using financial data.
+
+```shell
+python feature_engineering_1.py
+python create_sentiment_aggregate.py
+```
+
+### Optimized Modelling
+
+The script to run the optimized selected model
+
+```shell
+#TODO Karan
+```
+
+### Backtesting 
+
+The script to run the backtesting strategy to evaluate performance.
+
+```shell
+#TODO Karan
+```
+
+## Results Obtained
+
+### Optimized Model Approach
+
+#TODO Karan, add classification report wala table if it looks good.
+
+### Backtesting 
+
+#TODO Karan, put graph and talk about results.
