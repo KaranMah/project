@@ -104,8 +104,26 @@ python bcaktest_second.py
 
 ### Optimized Model Approach
 
+Ridge Classifier classification on 80-20 split
+
 ![Ridge Classifier classification on 80-20 split](https://github.com/KaranMah/project/blob/master/Additional_docs/80-20%20split%20BDT%20classification.png?raw=true)
 
-### Backtesting 
+Accuracy plotted against various hyperparameters for Ridge Classifier
+![accuracy plot](https://github.com/KaranMah/project/blob/master/Additional_docs/BDT%20Ridge%20Classsification%20optimization%20acuracy%20plot.png?raw=true)
 
-#TODO Karan, put graph and talk about results.
+Walk forward forecasting results for chosen markets compared with a regular 80-20 split 
+![walk forward](https://github.com/KaranMah/project/blob/master/Additional_docs/Walk%20Forward%20forecasting%20results.png?raw=true)
+
+Ensemble voting for best performing approaches: walk forward for forex and 80-20 split for Index
+![ensemble](https://github.com/KaranMah/project/blob/master/Additional_docs/Ensemble%20voting%20results.png?raw=true)
+
+The above results highlighted the best approaches to get most accurate predictions for the chosen markets using SVM and Ridge Classifier.
+
+### Backtesting 
+Performance of two backtesting models: moving average and intraday trading based on predictions were analysed. Both strategies showed significant gains in equity. The results for BDT and MNT markets are shown below. Testing period for these models was Jan 2018-Dec 2019.
+
+Moving average backtesting
+![moving average backtesting](https://github.com/KaranMah/project/blob/master/Additional_docs/optimized%20moving%20average%20backtesting%20.png?raw=true)
+
+Intraday trading strategy
+![intraday trading](https://github.com/KaranMah/project/blob/master/Additional_docs/ptimized%20intraday%20trading.png?raw=true)
