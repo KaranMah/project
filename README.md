@@ -104,7 +104,7 @@ python bcaktest_second.py
 
 ### Optimized Model Approach
 
-![Ridge Classifier classification on 80-20 split]{https://github.com/KaranMah/project/blob/master/Additional_docs/80-20%20split%20BDT%20classification.png?raw=true}
+![Ridge Classifier classification on 80-20 split](https://github.com/KaranMah/project/blob/master/Additional_docs/80-20%20split%20BDT%20classification.png?raw=true)
 
 ### Backtesting 
 
