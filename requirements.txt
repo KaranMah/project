@@ -102,7 +102,7 @@ typing-extensions==3.7.4.2
 ufw==0.36
 unattended-upgrades==0.1
 Unidecode==1.1.1
-urllib3==1.25.9
+urllib3==1.26.5
 w3lib==1.21.0
 Werkzeug==0.16.0
 wrapt==1.11.2
