@@ -30,7 +30,7 @@ hyperlink==19.0.0
 idna==2.8
 incremental==17.5.0
 investpy==0.9.12
-Jinja2==2.11.2
+Jinja2==2.11.3
 joblib==0.14.1
 jsonpatch==1.16
 jsonpointer==1.10
